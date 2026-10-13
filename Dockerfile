@@ -24,4 +24,4 @@ COPY --from=build /app/dist ./dist
 EXPOSE 3000
 USER node
 
-CMD ["npm", "start"]
+CMD ["node", "--env-file-if-exists=.env", "dist/src/server.js"]

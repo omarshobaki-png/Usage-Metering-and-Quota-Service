@@ -38,7 +38,7 @@ docker compose up --build
 
 Compose exposes the API on `http://localhost:3000` and PostgreSQL on `localhost:5432` by default. Set `API_PORT` or `POSTGRES_PORT` before starting Compose if either host port is already occupied.
 
-The database uses the named `postgres_data` volume. PostgreSQL must pass its `pg_isready` health check before Compose starts the API. The API then performs its own bounded `SELECT 1` readiness check before listening, retrying at most 10 times and failing with a readable `DatabaseConnectionError` if PostgreSQL remains unavailable.
+The database uses the named `postgres_data` volume. PostgreSQL must pass its `pg_isready` health check before Compose starts the API. The API then performs its own bounded `SELECT 1` readiness check before listening, retrying at most 10 times and failing with a readable `DatabaseConnectionError` if PostgreSQL remains unavailable. Compose also checks the API's `GET /health` route and marks the API healthy only when that route returns a successful response.
 
 Inside Compose, the API connects to `db:5432` because `db` is the database service name. `localhost` inside the API container would refer to the API container itself. The `.env.example` URL uses `localhost:5432` because it is intended for commands run directly on the host machine.
 
@@ -46,10 +46,11 @@ In another terminal, inspect readiness and run the diagnostic:
 
 ```bash
 docker compose ps
+curl http://localhost:3000/health
 docker compose run --rm api npm run db:check
 ```
 
-The diagnostic succeeds with `Database connection successful: SELECT 1 returned 1.` It retries five times before returning a clear failure, so it cannot wait forever.
+When the database is reachable, the health request returns `200` with `{ "status": "ok", "database": "reachable" }`. If the running API loses its database connection, the same route returns `503` with a safe JSON error instead of exposing database details. The diagnostic succeeds with `Database connection successful: SELECT 1 returned 1.` It retries five times before returning a clear failure, so it cannot wait forever.
 
 To verify that the named volume preserves data across an ordinary database restart, create a temporary probe row, restart PostgreSQL, read the row, and remove the probe:
 
@@ -64,6 +65,16 @@ docker compose exec -T db psql -U usage_metering -d usage_metering -c "DROP TABL
 `docker compose down` removes the containers but preserves the named volume. `docker compose down --volumes` intentionally deletes that database volume and its data.
 
 `docker compose up --build` is the intended final project entry point, but the stack is not yet the complete submission: Task 8 adds migrations and predefined plan seeds, and Chapter 6 adds the runnable example client.
+
+### HTTP request handling
+
+JSON request bodies are limited to 1 MiB (1,048,576 bytes). Unknown routes return a JSON `404` response, malformed JSON returns JSON with status `400`, and oversized bodies return JSON with status `413`. Unexpected failures return a generic JSON `500` response without exposing stack traces, SQL statements, connection strings, or other internal details.
+
+Every error uses the envelope `{ "error": { "code": "...", "message": "..." }, "correlationId": "..." }`. Fastify generates the correlation ID for each HTTP request, includes it in the `X-Request-Id` response header, and attaches the same request ID to its logs. This server-generated correlation ID is separate from the client-supplied consumption `requestId` used for safe retries.
+
+Application logging redacts the `X-API-Key` and `Authorization` request headers as `[REDACTED]`. Smoke tests cover database-aware health responses, JSON `404` responses, malformed JSON, safe dependency-failure responses, and credential redaction.
+
+The server handles `SIGINT` and `SIGTERM` as graceful-shutdown requests. It stops accepting HTTP traffic, waits for Fastify to close its listener, and then closes the PostgreSQL connection pool. This is the path used by `Ctrl+C` and `docker compose stop`.
 
 ## Core concepts
 
