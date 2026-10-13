@@ -1,0 +1,192 @@
+# Usage Metering and Quota Service
+
+A TypeScript and PostgreSQL service that records usage and enforces account-level and user-level quotas.
+
+## Project status
+
+The strict TypeScript workspace and the Dockerized PostgreSQL/API foundation are in place. Database migrations, quota API behavior, broader automated tests, the completed demo client, and performance scenarios will be added in the next milestones.
+
+## Development setup
+
+Use Node.js 22 LTS. The repository pins that major version in `.nvmrc` and `package.json` and includes `package-lock.json` for reproducible installs.
+
+```bash
+nvm use
+npm ci
+cp .env.example .env
+```
+
+Replace the placeholder values in `.env` for your local environment. `DATABASE_URL` is required; startup fails with a `ConfigurationError` that identifies the missing setting.
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Run the TypeScript server in watch mode during development. |
+| `npm run typecheck` | Check the source with strict TypeScript without emitting files. |
+| `npm run build` | Compile the project into `dist/`. |
+| `npm start` | Run the compiled server. |
+| `npm run db:check` | Run the compiled bounded PostgreSQL `SELECT 1` diagnostic. |
+| `npm test` | Run the automated test suite once. |
+| `npm run test:watch` | Re-run tests as files change. |
+
+## Docker Compose and PostgreSQL
+
+Start the current API and PostgreSQL stack with:
+
+```bash
+docker compose up --build
+```
+
+Compose exposes the API on `http://localhost:3000` and PostgreSQL on `localhost:5432` by default. Set `API_PORT` or `POSTGRES_PORT` before starting Compose if either host port is already occupied.
+
+The database uses the named `postgres_data` volume. PostgreSQL must pass its `pg_isready` health check before Compose starts the API. The API then performs its own bounded `SELECT 1` readiness check before listening, retrying at most 10 times and failing with a readable `DatabaseConnectionError` if PostgreSQL remains unavailable.
+
+Inside Compose, the API connects to `db:5432` because `db` is the database service name. `localhost` inside the API container would refer to the API container itself. The `.env.example` URL uses `localhost:5432` because it is intended for commands run directly on the host machine.
+
+In another terminal, inspect readiness and run the diagnostic:
+
+```bash
+docker compose ps
+docker compose run --rm api npm run db:check
+```
+
+The diagnostic succeeds with `Database connection successful: SELECT 1 returned 1.` It retries five times before returning a clear failure, so it cannot wait forever.
+
+To verify that the named volume preserves data across an ordinary database restart, create a temporary probe row, restart PostgreSQL, read the row, and remove the probe:
+
+```bash
+docker compose exec -T db psql -U usage_metering -d usage_metering -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS task4_probe (message text NOT NULL); TRUNCATE task4_probe; INSERT INTO task4_probe VALUES ('database survived');"
+docker compose restart db
+docker compose up -d --wait db
+docker compose exec -T db psql -U usage_metering -d usage_metering -c "SELECT message FROM task4_probe;"
+docker compose exec -T db psql -U usage_metering -d usage_metering -c "DROP TABLE task4_probe;"
+```
+
+`docker compose down` removes the containers but preserves the named volume. `docker compose down --volumes` intentionally deletes that database volume and its data.
+
+`docker compose up --build` is the intended final project entry point, but the stack is not yet the complete submission: Task 8 adds migrations and predefined plan seeds, and Chapter 6 adds the runnable example client.
+
+## Core concepts
+
+The service meters one resource: **document-processing units**.
+
+| Concept | Meaning |
+| --- | --- |
+| Account | An application or company that calls the service. Its plan limits usage shared by all of its users. |
+| User | A user registered under an account. The user's plan defines individual limits. |
+| Plan | A named set of configurable quota rules assignable to an account or user. |
+| Consumption decision | The accepted or rejected result of a request to consume a positive whole number of units for a user. |
+
+## Core accounting invariant
+
+An accepted action adds the same number of units to the user total and the account total for the current UTC calendar month. The account total is the sum of accepted usage across its users for that month. These totals are two views of one action, not two separate charges.
+
+A rejected action adds zero units at both levels.
+
+For example, if an account has 30 units remaining and a user has 10 remaining, accepting a 4-unit request leaves the account with 26 and the user with 6. If the account has 5 remaining and a user has 20, a 10-unit request is rejected and both totals remain unchanged.
+
+## Required behavior and implementation choices
+
+The project requires TypeScript, PostgreSQL, one metered resource, account API keys, account and user plans, monthly allowances, maximum units per request, persistent history, safe retries, concurrent-request correctness, and a full-stack Docker Compose command.
+
+Route names, framework details, database schema, HTTP status choices, pagination format, rule-evaluation order, and other unspecified behavior are implementation decisions. Each material decision and its reasoning will be documented here as it is made.
+
+## Product decisions
+
+These decisions define the API contract that later implementation and tests will follow.
+
+### Provisioning and authentication
+
+- Accounts and their initial API keys are created through an operator CLI. This keeps account provisioning outside the customer-facing HTTP API.
+- Authenticated HTTP endpoints require an `X-API-Key` header. The service derives the account from that key; callers cannot select another account by including an `accountId` in a request body or query string.
+- A missing or invalid API key returns `401 Unauthorized`. A resource that is missing or belongs to another account returns `404 Not Found`, which avoids revealing another account's data.
+
+### Months, usage, and plan changes
+
+- Monthly allowances use UTC calendar months, identified as `YYYY-MM`. A new UTC month starts with zero usage while earlier months remain available for queries.
+- Consume decisions are immutable historical snapshots. They retain the result, reason, applied rules, and balances recorded when the request was first decided.
+- Usage and plan-inspection endpoints show the plans currently assigned. Remaining allowance is calculated as `max(0, current monthly limit - consumed)`.
+- Updating or switching a plan affects later requests but never resets usage or rewrites earlier decisions. For example, after consuming 12 units, lowering the monthly limit to 10 leaves `consumed = 12` and reports `remaining = 0`.
+
+### Request identifiers and safe retries
+
+- Every consume request supplies a caller-generated `requestId`. It is scoped to the authenticated account and must contain 1–128 characters from letters, digits, `.`, `_`, `:`, and `-` (the pattern `^[A-Za-z0-9._:-]{1,128}$`). Two accounts may therefore use the same identifier independently.
+- Repeating the same account, `requestId`, `userId`, and `units` returns the original recorded response without consuming units again. This applies to accepted and quota-rejected decisions.
+- Reusing an account's `requestId` with a different `userId` or `units` returns `409 Conflict` and creates no new decision or usage.
+- A replay stays historical even if a plan changes. If a request was rejected and its allowance is later increased, retrying the same ID and payload returns the original rejection; the caller needs a new request ID for a new decision.
+
+### Numeric and request validation
+
+- Consumption `units` must be a JSON number that is a positive safe integer. Plan limits must be JSON numbers that are non-negative safe integers; zero is a valid deny-all limit.
+- The largest accepted value for `units` or a plan limit is `2,147,483,647`. This bound is represented exactly by JavaScript numbers and PostgreSQL integers, and monthly quota enforcement keeps accepted totals within it.
+- Values such as `0`, `-1`, `1.5`, the string `"4"`, a missing value, or an integer above the bound are rejected with `400 Bad Request` before quota accounting.
+- Only a request with valid authentication, valid input, and a user owned by the authenticated account becomes a consumption decision. A valid quota rejection is recorded because it is a real decision; authentication, validation, ownership, and request-ID conflict failures are not.
+
+### Endpoint checklist
+
+The API will provide endpoints for:
+
+- inspecting the authenticated account;
+- creating and inspecting users within that account;
+- listing, creating, inspecting, and updating plans, plus assigning account and user plans;
+- consuming units with `POST /consume`;
+- querying current and previous account and user usage; and
+- reading consumption-decision history with pagination.
+
+Exact paths for the remaining resources and detailed request and response examples will be documented as those routes are implemented.
+
+### HTTP and decision errors
+
+| Status | Meaning |
+| --- | --- |
+| `200 OK` | A valid consumption decision, whether accepted or rejected by a quota rule. The body includes `accepted` and an explicit reason. |
+| `400 Bad Request` | Malformed JSON, an invalid request identifier, an invalid numeric value, or another invalid input. |
+| `401 Unauthorized` | The `X-API-Key` header is missing or invalid. |
+| `403 Forbidden` | A caller attempts to modify a predefined plan. |
+| `404 Not Found` | A requested resource does not exist or belongs to another account. |
+| `409 Conflict` | An account-scoped request ID is reused with a different user or quantity. |
+| `422 Unprocessable Content` | A valid plan cannot be used for the requested assignment because its account/user scope is incompatible. |
+
+## Delivery checklist
+
+The final submission must include:
+
+- A GitHub repository containing the service, predefined plans, and straightforward setup instructions.
+- A complete Docker Compose stack containing PostgreSQL, the service, startup initialization, and a runnable example client.
+- A README covering the API, model, API keys, rules, plan changes, retry behavior, assumptions, design decisions, and known limitations.
+- Automated tests for the important behaviors, including API-key validation, account isolation, safe retries, and concurrent requests.
+- Reproducible performance tests, scripts, configuration, commands, dependencies, results, and a short explanation of what was learned.
+
+## Scope
+
+### In scope
+
+- One TypeScript backend service
+- One PostgreSQL database
+- One resource measured in document-processing units
+- Account-level and user-level plans
+- Account API-key authentication and account isolation
+- A small example client
+- Startup initialization, persistent request history, safe retries, concurrency tests, and performance evidence
+
+### Out of scope
+
+- Billing and payments
+- Refunds
+- End-user login
+- Multiple resource types
+- Role-based access control
+- Distributed infrastructure
+
+## Timeline
+
+The estimate is 42 working hours. The dated project window is October 12-20, 2026; the brief also describes the timeline as one week.
+
+## Documentation to complete during implementation
+
+- Local setup and Docker Compose
+- API authentication, endpoints, and examples
+- Consumption, retry, and concurrency behavior
+- Plan changes and UTC month handling
+- Product assumptions and design decisions
+- Automated and performance testing
+- Known limitations

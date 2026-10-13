@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:17.6-bookworm
+    environment:
+      POSTGRES_DB: usage_metering
+      POSTGRES_USER: usage_metering
+      POSTGRES_PASSWORD: usage_metering_dev
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+      start_period: 5s
+
+  api:
+    build:
+      context: .
+      target: runtime
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgres://usage_metering:usage_metering_dev@db:5432/usage_metering
+      API_KEY_PEPPER: local-compose-pepper-change-me
+    ports:
+      - "${API_PORT:-3000}:3000"
+
+volumes:
+  postgres_data:
