@@ -9,6 +9,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node --env-file-if-exists=.env dist/src/server.js",
     "db:check": "node --env-file-if-exists=.env dist/src/db/check-connection.js",
+    "db:migrate": "node --env-file-if-exists=.env --import tsx src/db/migrate.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"

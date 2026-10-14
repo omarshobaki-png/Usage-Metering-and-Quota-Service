@@ -1,0 +1,91 @@
+CREATE TABLE accounts (
+  id uuid PRIMARY KEY,
+  name text NOT NULL,
+  api_key_digest text NOT NULL UNIQUE,
+  account_plan_id uuid NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE plans (
+  id uuid PRIMARY KEY,
+  owner_account_id uuid REFERENCES accounts(id) ON DELETE RESTRICT,
+  scope text NOT NULL CHECK (scope IN ('account', 'user')),
+  name text NOT NULL,
+  monthly_limit integer NOT NULL
+    CHECK (monthly_limit BETWEEN 0 AND 2147483647),
+  max_units_per_request integer NOT NULL
+    CHECK (max_units_per_request BETWEEN 0 AND 2147483647),
+  revision integer NOT NULL DEFAULT 1 CHECK (revision > 0),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE accounts
+  ADD CONSTRAINT accounts_account_plan_fk
+  FOREIGN KEY (account_plan_id) REFERENCES plans(id) ON DELETE RESTRICT;
+
+CREATE TABLE users (
+  id uuid PRIMARY KEY,
+  account_id uuid NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  user_plan_id uuid NOT NULL REFERENCES plans(id) ON DELETE RESTRICT,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (account_id, id)
+);
+
+CREATE TABLE account_monthly_usage (
+  account_id uuid NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  usage_month date NOT NULL CHECK (EXTRACT(DAY FROM usage_month) = 1),
+  consumed_units integer NOT NULL DEFAULT 0
+    CHECK (consumed_units BETWEEN 0 AND 2147483647),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (account_id, usage_month)
+);
+
+CREATE TABLE user_monthly_usage (
+  account_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  usage_month date NOT NULL CHECK (EXTRACT(DAY FROM usage_month) = 1),
+  consumed_units integer NOT NULL DEFAULT 0
+    CHECK (consumed_units BETWEEN 0 AND 2147483647),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, usage_month),
+  FOREIGN KEY (account_id, user_id)
+    REFERENCES users(account_id, id) ON DELETE CASCADE
+);
+
+CREATE TABLE request_decisions (
+  account_id uuid NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+  request_id varchar(128) NOT NULL
+    CHECK (request_id ~ '^[A-Za-z0-9._:-]{1,128}$'),
+  user_id uuid NOT NULL,
+  requested_units integer NOT NULL
+    CHECK (requested_units BETWEEN 1 AND 2147483647),
+  processed_at timestamptz NOT NULL DEFAULT now(),
+  processed_month date NOT NULL CHECK (EXTRACT(DAY FROM processed_month) = 1),
+  accepted boolean NOT NULL,
+  decision_reason text NOT NULL,
+  blocking_rule text,
+  blocking_scope text CHECK (blocking_scope IN ('account', 'user')),
+  account_plan_id uuid NOT NULL REFERENCES plans(id) ON DELETE RESTRICT,
+  user_plan_id uuid NOT NULL REFERENCES plans(id) ON DELETE RESTRICT,
+  account_plan_revision integer NOT NULL CHECK (account_plan_revision > 0),
+  user_plan_revision integer NOT NULL CHECK (user_plan_revision > 0),
+  decision_snapshot jsonb NOT NULL
+    CHECK (jsonb_typeof(decision_snapshot) = 'object'),
+  PRIMARY KEY (account_id, request_id),
+  FOREIGN KEY (account_id, user_id)
+    REFERENCES users(account_id, id) ON DELETE RESTRICT
+);
+
+-- The users (account_id, id) unique index supports account-scoped user lookup.
+-- The usage primary keys support exact subject-and-month lookup.
+-- The request_decisions primary key supports account-scoped request replay.
+-- The accounts API-key unique index supports authentication lookup.
+
+-- Supports listing custom plans belonging to an account.
+CREATE INDEX plans_owner_account_id_idx
+  ON plans (owner_account_id);
+
+-- Supports newest-first decision history for an account.
+CREATE INDEX request_decisions_account_processed_at_idx
+  ON request_decisions (account_id, processed_at DESC);

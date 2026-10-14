@@ -4,7 +4,7 @@ A TypeScript and PostgreSQL service that records usage and enforces account-leve
 
 ## Project status
 
-The strict TypeScript workspace and the Dockerized PostgreSQL/API foundation are in place. Database migrations, quota API behavior, broader automated tests, the completed demo client, and performance scenarios will be added in the next milestones.
+The strict TypeScript workspace, Dockerized PostgreSQL/API foundation, and initial database schema are in place. Quota API behavior, broader automated tests, the completed demo client, and performance scenarios will be added in the next milestones.
 
 ## Development setup
 
@@ -25,6 +25,7 @@ Replace the placeholder values in `.env` for your local environment. `DATABASE_U
 | `npm run build` | Compile the project into `dist/`. |
 | `npm start` | Run the compiled server. |
 | `npm run db:check` | Run the compiled bounded PostgreSQL `SELECT 1` diagnostic. |
+| `npm run db:migrate` | Apply pending PostgreSQL migrations. |
 | `npm test` | Run the automated test suite once. |
 | `npm run test:watch` | Re-run tests as files change. |
 
@@ -52,6 +53,8 @@ docker compose run --rm api npm run db:check
 
 When the database is reachable, the health request returns `200` with `{ "status": "ok", "database": "reachable" }`. If the running API loses its database connection, the same route returns `503` with a safe JSON error instead of exposing database details. The diagnostic succeeds with `Database connection successful: SELECT 1 returned 1.` It retries five times before returning a clear failure, so it cannot wait forever.
 
+Run `npm run db:migrate` to apply the ordered SQL files in `src/db/migrations`. Applied filenames are recorded in `schema_migrations`, so running the command again safely reports no pending migrations. Quantities use PostgreSQL `integer` values bounded at `2,147,483,647`; `pg` returns this type as an exact JavaScript number without a custom parser.
+
 To verify that the named volume preserves data across an ordinary database restart, create a temporary probe row, restart PostgreSQL, read the row, and remove the probe:
 
 ```bash
@@ -64,7 +67,7 @@ docker compose exec -T db psql -U usage_metering -d usage_metering -c "DROP TABL
 
 `docker compose down` removes the containers but preserves the named volume. `docker compose down --volumes` intentionally deletes that database volume and its data.
 
-`docker compose up --build` is the intended final project entry point, but the stack is not yet the complete submission: Task 8 adds migrations and predefined plan seeds, and Chapter 6 adds the runnable example client.
+`docker compose up --build` is the intended final project entry point, but the stack is not yet the complete submission: Task 8 adds automatic migration startup and predefined plan seeds, and Chapter 6 adds the runnable example client.
 
 ### HTTP request handling
 
