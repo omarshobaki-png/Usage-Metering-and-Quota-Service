@@ -10,6 +10,9 @@
     "start": "node --env-file-if-exists=.env dist/src/server.js",
     "db:check": "node --env-file-if-exists=.env dist/src/db/check-connection.js",
     "db:migrate": "node --env-file-if-exists=.env --import tsx src/db/migrate.ts",
+    "db:seed": "node --env-file-if-exists=.env --import tsx src/db/seed.ts",
+    "db:init": "node --env-file-if-exists=.env --import tsx src/db/initialize.ts",
+    "account:create": "node --env-file-if-exists=.env --import tsx scripts/create-account.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"

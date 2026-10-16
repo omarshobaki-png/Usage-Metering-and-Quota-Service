@@ -4,7 +4,7 @@ A TypeScript and PostgreSQL service that records usage and enforces account-leve
 
 ## Project status
 
-The strict TypeScript workspace, Dockerized PostgreSQL/API foundation, and initial database schema are in place. Quota API behavior, broader automated tests, the completed demo client, and performance scenarios will be added in the next milestones.
+The strict TypeScript workspace, Dockerized PostgreSQL/API foundation, initial database schema, automatic predefined-plan setup, secure account-provisioning CLI, and account-scoped user data layer are in place. Quota API behavior, authenticated user routes, broader automated tests, the completed demo client, and performance scenarios will be added in the next milestones.
 
 ## Development setup
 
@@ -16,7 +16,7 @@ npm ci
 cp .env.example .env
 ```
 
-Replace the placeholder values in `.env` for your local environment. `DATABASE_URL` is required; startup fails with a `ConfigurationError` that identifies the missing setting.
+Replace the placeholder values in `.env` for your local environment. `DATABASE_URL` is required; startup fails with a `ConfigurationError` that identifies the missing setting. Set `API_KEY_PEPPER` to a private random value of at least 16 characters before provisioning accounts, and keep the same value so later API-key authentication can reproduce stored digests.
 
 | Command | Purpose |
 | --- | --- |
@@ -26,8 +26,19 @@ Replace the placeholder values in `.env` for your local environment. `DATABASE_U
 | `npm start` | Run the compiled server. |
 | `npm run db:check` | Run the compiled bounded PostgreSQL `SELECT 1` diagnostic. |
 | `npm run db:migrate` | Apply pending PostgreSQL migrations. |
+| `npm run db:seed` | Insert any missing predefined plans without changing existing rows. |
+| `npm run db:init` | Apply migrations and then seed predefined plans. |
+| `npm run account:create -- --name "Example Company"` | Create an account on Starter and reveal its API key once. |
 | `npm test` | Run the automated test suite once. |
 | `npm run test:watch` | Re-run tests as files change. |
+
+The schema, seed, and account-provisioning integration tests require `TEST_DATABASE_URL` (or `DATABASE_URL`) to point to a disposable PostgreSQL database where the configured user may create and drop isolated schemas. For example:
+
+```bash
+TEST_DATABASE_URL=postgres://usage_metering:usage_metering_dev@localhost:5432/usage_metering npm test
+```
+
+Each integration suite uses a unique temporary schema and removes only that schema when it finishes.
 
 ## Docker Compose and PostgreSQL
 
@@ -39,7 +50,7 @@ docker compose up --build
 
 Compose exposes the API on `http://localhost:3000` and PostgreSQL on `localhost:5432` by default. Set `API_PORT` or `POSTGRES_PORT` before starting Compose if either host port is already occupied.
 
-The database uses the named `postgres_data` volume. PostgreSQL must pass its `pg_isready` health check before Compose starts the API. The API then performs its own bounded `SELECT 1` readiness check before listening, retrying at most 10 times and failing with a readable `DatabaseConnectionError` if PostgreSQL remains unavailable. Compose also checks the API's `GET /health` route and marks the API healthy only when that route returns a successful response.
+The database uses the named `postgres_data` volume. PostgreSQL must pass its `pg_isready` health check before Compose runs the one-time `init` service. That service applies migrations and inserts missing predefined plans. The API starts only after initialization succeeds, then performs its own bounded `SELECT 1` readiness check before listening. Compose checks the API's `GET /health` route and marks the API healthy only when that route returns a successful response.
 
 Inside Compose, the API connects to `db:5432` because `db` is the database service name. `localhost` inside the API container would refer to the API container itself. The `.env.example` URL uses `localhost:5432` because it is intended for commands run directly on the host machine.
 
@@ -53,21 +64,80 @@ docker compose run --rm api npm run db:check
 
 When the database is reachable, the health request returns `200` with `{ "status": "ok", "database": "reachable" }`. If the running API loses its database connection, the same route returns `503` with a safe JSON error instead of exposing database details. The diagnostic succeeds with `Database connection successful: SELECT 1 returned 1.` It retries five times before returning a clear failure, so it cannot wait forever.
 
-Run `npm run db:migrate` to apply the ordered SQL files in `src/db/migrations`. Applied filenames are recorded in `schema_migrations`, so running the command again safely reports no pending migrations. Quantities use PostgreSQL `integer` values bounded at `2,147,483,647`; `pg` returns this type as an exact JavaScript number without a custom parser.
+Run `npm run db:init` outside Compose to apply the SQL files in `src/db/migrations` and insert any missing predefined plans. Applied filenames are recorded in `schema_migrations`, and each predefined plan has a fixed integer ID, so repeating initialization creates no duplicate plans and does not overwrite existing rows. Account and user IDs remain UUIDs, while plan IDs and the columns that reference them use integers. Quantities use PostgreSQL `integer` values bounded at `2,147,483,647`; `pg` returns this type as an exact JavaScript number without a custom parser.
+
+### Predefined plans
+
+| Plan | Scope | Monthly limit | Maximum per request |
+| --- | --- | ---: | ---: |
+| Starter | Account | 10,000 | 100 |
+| Pro | Account | 100,000 | 1,000 |
+| Basic | User | 1,000 | 20 |
+| Premium | User | 10,000 | 100 |
+
+These four definitions are global plans, represented by rows whose `owner_account_id` is `NULL`. Normal startup inserts a missing definition but never updates an existing plan, assignment, usage row, or decision. A deliberate future change to a predefined plan should be made through a migration rather than by silently resetting seed data.
+
+### Provision an account and issue its API key
+
+Account provisioning is an operator command rather than a public HTTP endpoint. Initialize the database, configure `DATABASE_URL` and `API_KEY_PEPPER` in the untracked `.env` file, then run:
+
+```bash
+npm run account:create -- --name "Example Company"
+```
+
+Starter is the default account plan. Select another predefined account plan explicitly with `--plan`:
+
+```bash
+npm run account:create -- --name "Example Company" --plan Pro
+```
+
+The command generates 32 cryptographically random bytes, encodes them in a header-safe `umq_...` key, and reveals that raw key once. PostgreSQL stores only an HMAC-SHA-256 digest created with `API_KEY_PEPPER`. Save the displayed key in an untracked secret store and later supply it to clients through environment configuration; do not put it in source files, command output captures, or normal application logs. Losing the raw key requires issuing a replacement in a future key-rotation flow because the digest cannot recover it.
+
+Provisioning validates the selected plan and inserts the account plus its initial plan assignment in one transaction. `Starter` and `Pro` are valid; `Basic` and `Premium` are user-scope plans and are rejected without leaving a partial account. Ordinary API and database restarts do not recreate accounts or rotate keys.
+
+### Account-owned users
+
+The user data layer creates opaque UUID-based users that always belong to one account and have one eligible user-scope plan. Basic is the default; Premium or an account-owned custom user plan may be selected explicitly. Account-scope plans and custom plans owned by another account are rejected without leaving partial rows.
+
+User mutations begin a transaction, lock the owning account row first with `SELECT ... FOR UPDATE`, validate the plan in a later statement, write the user, and then commit. Failure paths roll back and always release the checked-out connection. This account-first order is shared infrastructure for later assignment and quota mutations.
+
+Every lookup requires both `accountId` and `userId`, so asking account A for an account B user returns not found. The public data representation contains the user ID, owning account ID, creation time, and current plan summary. This project does not currently use user display names. API-key digests and internal SQL details are never part of a user result. HTTP authentication and user routes are added in later tasks.
+
+### Data integrity enforcement
+
+PostgreSQL constraints protect structural invariants even if application code contains a bug:
+
+- primary and foreign keys require referenced accounts, users, and plans to exist;
+- `(account_id, request_id)` uniquely identifies a consumption decision within one account while allowing another account to reuse the same request ID;
+- composite account/user foreign keys prevent usage and decision rows from connecting one account to another account's user;
+- checks restrict plan scope to `account` or `user`, require non-negative limits and usage, require positive requested units, and bound quantities at `2,147,483,647`;
+- usage rows are unique by subject and UTC month, and stored month values must be the first day of that month;
+- API-key digests are unique, while plan and decision references cannot be removed when protected historical or assignment rows still depend on them.
+
+Some ownership and ordering rules need transactional application checks because a normal foreign key proves only that a plan exists:
+
+- an account may receive only an account-scope predefined plan or an eligible custom account plan;
+- a user may receive only a user-scope predefined plan or a custom user plan owned by the same account;
+- account-scoped reads include `accountId` in the query so another account's resource is returned as not found;
+- mutations lock the account row first with `SELECT ... FOR UPDATE`, then read current plans and usage in later statements before writing;
+- later quota transactions must update account usage, user usage, and the immutable decision together, so acceptance changes both totals and rejection changes neither;
+- plan changes must preserve accumulated subject usage and historical decision snapshots.
+
+Usage belongs to the account or user rather than to the assigned plan. Multiple users may therefore share one plan definition while keeping separate monthly usage rows, and changing a plan never transfers, merges, or resets their consumed units.
 
 To verify that the named volume preserves data across an ordinary database restart, create a temporary probe row, restart PostgreSQL, read the row, and remove the probe:
 
 ```bash
-docker compose exec -T db psql -U usage_metering -d usage_metering -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS task4_probe (message text NOT NULL); TRUNCATE task4_probe; INSERT INTO task4_probe VALUES ('database survived');"
+docker compose exec -T db psql -U usage_metering -d usage_metering -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS persistence_probe (message text NOT NULL); TRUNCATE persistence_probe; INSERT INTO persistence_probe VALUES ('database survived');"
 docker compose restart db
 docker compose up -d --wait db
-docker compose exec -T db psql -U usage_metering -d usage_metering -c "SELECT message FROM task4_probe;"
-docker compose exec -T db psql -U usage_metering -d usage_metering -c "DROP TABLE task4_probe;"
+docker compose exec -T db psql -U usage_metering -d usage_metering -c "SELECT message FROM persistence_probe;"
+docker compose exec -T db psql -U usage_metering -d usage_metering -c "DROP TABLE persistence_probe;"
 ```
 
 `docker compose down` removes the containers but preserves the named volume. `docker compose down --volumes` intentionally deletes that database volume and its data.
 
-`docker compose up --build` is the intended final project entry point, but the stack is not yet the complete submission: Task 8 adds automatic migration startup and predefined plan seeds, and Chapter 6 adds the runnable example client.
+`docker compose up --build` now starts PostgreSQL, completes migrations and predefined-plan setup, and starts the API. The runnable example client will be added later.
 
 ### HTTP request handling
 

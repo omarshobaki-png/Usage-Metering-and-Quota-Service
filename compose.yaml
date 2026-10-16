@@ -21,8 +21,8 @@ services:
       context: .
       target: runtime
     depends_on:
-      db:
-        condition: service_healthy
+      init:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
@@ -41,6 +41,19 @@ services:
       timeout: 3s
       retries: 10
       start_period: 5s
+
+  init:
+    build:
+      context: .
+      target: runtime
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://usage_metering:usage_metering_dev@db:5432/usage_metering
+      API_KEY_PEPPER: local-compose-pepper-change-me
+    command: ["node", "dist/src/db/initialize.js"]
 
 volumes:
   postgres_data:
