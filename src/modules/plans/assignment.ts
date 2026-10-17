@@ -1,4 +1,7 @@
-import type { PoolClient } from "pg";
+import type { Pool, PoolClient } from "pg";
+
+import { withLockedAccountTransaction } from "../../db/account-transaction.js";
+import type { User } from "../users/service.js";
 
 export type AssignmentScope = "account" | "user";
 
@@ -25,6 +28,26 @@ export class PlanAssignmentError extends Error {
     super(message);
     this.name = "PlanAssignmentError";
   }
+}
+
+export class AssignmentUserNotFoundError extends Error {
+  public constructor() {
+    super("User not found.");
+    this.name = "AssignmentUserNotFoundError";
+  }
+}
+
+export interface AssignedAccount {
+  id: string;
+  name: string;
+  plan: {
+    id: number;
+    name: string;
+    scope: AssignmentScope;
+    monthlyLimit: number;
+    maxUnitsPerRequest: number;
+    revision: number;
+  };
 }
 
 interface ValidatePlanAssignmentInput {
@@ -69,8 +92,9 @@ export async function validatePlanAssignment(
               revision
             FROM plans
             WHERE id = $1
+              AND (owner_account_id IS NULL OR owner_account_id = $2)
           `,
-          [input.planId]
+          [input.planId, input.accountId]
         );
   const plan = planResult.rows[0];
 
@@ -101,4 +125,100 @@ export async function validatePlanAssignment(
   }
 
   return plan;
+}
+
+function planSummary(plan: AssignablePlan): AssignedAccount["plan"] {
+  return {
+    id: plan.id,
+    name: plan.name,
+    scope: plan.scope,
+    monthlyLimit: plan.monthlyLimit,
+    maxUnitsPerRequest: plan.maxUnitsPerRequest,
+    revision: plan.revision
+  };
+}
+
+export async function assignAccountPlan(
+  pool: Pool,
+  accountId: string,
+  planId: number
+): Promise<AssignedAccount> {
+  return withLockedAccountTransaction(pool, accountId, async (client) => {
+    const plan = await validatePlanAssignment(client, {
+      accountId,
+      planId,
+      requiredScope: "account",
+      defaultPredefinedPlanName: "Starter"
+    });
+    const accountResult = await client.query<{ id: string; name: string }>(
+      `
+        UPDATE accounts
+        SET account_plan_id = $2
+        WHERE id = $1
+        RETURNING id, name
+      `,
+      [accountId, plan.id]
+    );
+    const account = accountResult.rows[0];
+
+    if (account === undefined) {
+      throw new Error("The account was not returned after plan assignment.");
+    }
+
+    return {
+      ...account,
+      plan: planSummary(plan)
+    };
+  });
+}
+
+export async function assignUserPlan(
+  pool: Pool,
+  accountId: string,
+  userId: string,
+  planId: number
+): Promise<User> {
+  return withLockedAccountTransaction(pool, accountId, async (client) => {
+    const userResult = await client.query<{
+      id: string;
+      accountId: string;
+      createdAt: Date;
+    }>(
+      `
+        SELECT
+          id,
+          account_id AS "accountId",
+          created_at AS "createdAt"
+        FROM users
+        WHERE account_id = $1 AND id = $2
+      `,
+      [accountId, userId]
+    );
+    const user = userResult.rows[0];
+
+    if (user === undefined) {
+      throw new AssignmentUserNotFoundError();
+    }
+
+    const plan = await validatePlanAssignment(client, {
+      accountId,
+      planId,
+      requiredScope: "user",
+      defaultPredefinedPlanName: "Basic"
+    });
+
+    await client.query(
+      `
+        UPDATE users
+        SET user_plan_id = $3
+        WHERE account_id = $1 AND id = $2
+      `,
+      [accountId, userId, plan.id]
+    );
+
+    return {
+      ...user,
+      plan: planSummary(plan)
+    };
+  });
 }
