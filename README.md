@@ -4,7 +4,7 @@ A TypeScript and PostgreSQL service that records usage and enforces account-leve
 
 ## Project status
 
-The strict TypeScript workspace, Dockerized PostgreSQL/API foundation, initial database schema, automatic predefined-plan setup, secure account-provisioning CLI, and account-scoped user data layer are in place. Quota API behavior, authenticated user routes, broader automated tests, the completed demo client, and performance scenarios will be added in the next milestones.
+The strict TypeScript workspace, Dockerized PostgreSQL/API foundation, initial database schema, automatic predefined-plan setup, secure account provisioning, persistent API-key authentication, tenant-isolated user routes, strict request validation, account-owned custom-plan management, safe account/user plan assignment, and the stable consumption API contract are in place. The quota evaluator and database-backed consumption transaction, usage/history routes, completed demo client, and performance scenarios will be added in the next milestones.
 
 ## Development setup
 
@@ -143,6 +143,41 @@ docker compose exec -T db psql -U usage_metering -d usage_metering -c "DROP TABL
 
 JSON request bodies are limited to 1 MiB (1,048,576 bytes). Unknown routes return a JSON `404` response, malformed JSON returns JSON with status `400`, and oversized bodies return JSON with status `413`. Unexpected failures return a generic JSON `500` response without exposing stack traces, SQL statements, connection strings, or other internal details.
 
+`GET /health` is public. Tenant routes require the raw key issued by the account-provisioning command in the `X-API-Key` header. For example:
+
+```bash
+API_KEY='replace-with-the-one-time-issued-key'
+curl http://localhost:3000/account -H "X-API-Key: ${API_KEY}"
+```
+
+`GET /account` returns the authenticated account ID, name, and current account-plan summary. Account identity comes only from the API key; an `accountId` supplied in a query string cannot override it. Missing, empty, malformed, and unknown keys all receive the same generic `401 Unauthorized` response. Raw keys and stored digests are never returned. The server computes the key's HMAC-SHA-256 digest using `API_KEY_PEPPER` and looks up the persisted account, so issued keys continue working across normal API restarts as long as the database and pepper are preserved.
+
+Authenticated accounts can create and read their users:
+
+```bash
+curl -X POST http://localhost:3000/users \
+  -H "X-API-Key: ${API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+curl http://localhost:3000/users/replace-with-user-id \
+  -H "X-API-Key: ${API_KEY}"
+```
+
+`POST /users` creates the user under the account authenticated by the key and defaults to Basic. An optional positive integer `planId` may select an eligible user plan. Mutation bodies reject unknown fields, so a caller-supplied `accountId` receives `400 INVALID_REQUEST` and cannot change ownership. `GET /users/:id` always queries with both the authenticated account ID and user ID. A foreign user and a nonexistent user therefore return the same `404 USER_NOT_FOUND` response without revealing whether another account owns the ID.
+
+Detailed payload rules and safe error examples are documented in [`docs/api.md`](docs/api.md).
+
+### Tenant-isolation coverage
+
+| Tenant route area | Current evidence |
+| --- | --- |
+| Account inspection | Authenticated key-to-account tests |
+| User creation and reads | Two-account create/read isolation tests |
+| Custom plans | Authenticated create/read/update visibility and isolation tests |
+| Plan assignment | Scope, ownership, foreign-user, and preservation tests |
+| Consumption, usage, and history | Pending later metering tasks |
+
 Every error uses the envelope `{ "error": { "code": "...", "message": "..." }, "correlationId": "..." }`. Fastify generates the correlation ID for each HTTP request, includes it in the `X-Request-Id` response header, and attaches the same request ID to its logs. This server-generated correlation ID is separate from the client-supplied consumption `requestId` used for safe retries.
 
 Application logging redacts the `X-API-Key` and `Authorization` request headers as `[REDACTED]`. Smoke tests cover database-aware health responses, JSON `404` responses, malformed JSON, safe dependency-failure responses, and credential redaction.
@@ -203,7 +238,26 @@ These decisions define the API contract that later implementation and tests will
 - Consumption `units` must be a JSON number that is a positive safe integer. Plan limits must be JSON numbers that are non-negative safe integers; zero is a valid deny-all limit.
 - The largest accepted value for `units` or a plan limit is `2,147,483,647`. This bound is represented exactly by JavaScript numbers and PostgreSQL integers, and monthly quota enforcement keeps accepted totals within it.
 - Values such as `0`, `-1`, `1.5`, the string `"4"`, a missing value, or an integer above the bound are rejected with `400 Bad Request` before quota accounting.
+- Mutation bodies reject unknown fields rather than ignoring misspellings, ownership overrides, or duplicate concepts. JSON values are validated without string-to-number coercion.
+- Request IDs contain 1–128 characters from letters, digits, `.`, `_`, `:`, and `-`. Custom-plan names are trimmed, must contain 1–100 characters, and may not be blank.
 - Only a request with valid authentication, valid input, and a user owned by the authenticated account becomes a consumption decision. A valid quota rejection is recorded because it is a real decision; authentication, validation, ownership, and request-ID conflict failures are not.
+
+### Consumption contract
+
+`POST /consume` accepts exactly `userId`, `units`, and `requestId`. Account
+identity always comes from `X-API-Key`. Both accepted and quota-rejected
+decisions use one response shape containing the normalized request, processing
+time and UTC month, decision-time account/user balances, applied plan IDs and
+revisions, and `blockedBy`. An acceptance has `blockedBy: null`; a rejection
+identifies its `account` or `user` scope, `monthly_limit` or
+`max_units_per_request` rule, and blocking limit.
+
+A completed quota rejection is a `200` business decision and will be recorded.
+Invalid input (`400`), invalid authentication (`401`), an unknown or foreign
+user (`404`), and conflicting request-ID reuse (`409`) are API errors and do
+not alter usage or create a decision. Task 16 fixes this boundary; the pure
+rule evaluator and database-backed transaction are implemented in the
+following metering tasks. Full examples are in [`docs/api.md`](docs/api.md).
 
 ### Endpoint checklist
 
