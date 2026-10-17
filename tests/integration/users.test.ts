@@ -156,7 +156,7 @@ describe("account-owned users", () => {
     await expect(
       createUser(testPool, accountBId, { planId: customPlanId })
     ).rejects.toMatchObject<Partial<PlanAssignmentError>>({
-      code: "PLAN_NOT_AVAILABLE"
+      code: "PLAN_NOT_FOUND"
     });
 
     const accountBUsers = await testPool.query<{ count: string }>(

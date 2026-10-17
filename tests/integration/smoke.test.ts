@@ -9,6 +9,14 @@ function track(app: ReturnType<typeof buildApp>) {
   return app;
 }
 
+const rejectAuthentication = async () => null;
+const unusedUserOperations = {
+  createUser: async () => {
+    throw new Error("User creation is not used by this test.");
+  },
+  getUser: async () => null
+};
+
 afterEach(async () => {
   await Promise.all(apps.splice(0).map(async (app) => app.close()));
 });
@@ -16,7 +24,12 @@ afterEach(async () => {
 describe("HTTP smoke behavior", () => {
   it("returns 200 when the database health check succeeds", async () => {
     const app = track(
-      buildApp({ checkDatabase: async () => undefined, logger: false })
+      buildApp({
+        checkDatabase: async () => undefined,
+        authenticateAccount: rejectAuthentication,
+        userOperations: unusedUserOperations,
+        logger: false
+      })
     );
 
     const response = await app.inject({ method: "GET", url: "/health" });
@@ -31,6 +44,8 @@ describe("HTTP smoke behavior", () => {
         checkDatabase: async () => {
           throw new Error("SELECT secret at postgres://user:password@db");
         },
+        authenticateAccount: rejectAuthentication,
+        userOperations: unusedUserOperations,
         logger: false
       })
     );
@@ -54,7 +69,12 @@ describe("HTTP smoke behavior", () => {
 
   it("returns the shared JSON envelope for an unknown route", async () => {
     const app = track(
-      buildApp({ checkDatabase: async () => undefined, logger: false })
+      buildApp({
+        checkDatabase: async () => undefined,
+        authenticateAccount: rejectAuthentication,
+        userOperations: unusedUserOperations,
+        logger: false
+      })
     );
 
     const response = await app.inject({
@@ -71,7 +91,12 @@ describe("HTTP smoke behavior", () => {
 
   it("returns a safe JSON 400 response for malformed JSON", async () => {
     const app = track(
-      buildApp({ checkDatabase: async () => undefined, logger: false })
+      buildApp({
+        checkDatabase: async () => undefined,
+        authenticateAccount: rejectAuthentication,
+        userOperations: unusedUserOperations,
+        logger: false
+      })
     );
     app.post("/test-json-parser", async (request) => request.body);
 
@@ -98,6 +123,8 @@ describe("HTTP smoke behavior", () => {
     const app = track(
       buildApp({
         checkDatabase: async () => undefined,
+        authenticateAccount: rejectAuthentication,
+        userOperations: unusedUserOperations,
         logger: {
           stream: {
             write(message: string) {
