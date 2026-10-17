@@ -79,10 +79,6 @@ CREATE TABLE request_decisions (
     REFERENCES users(account_id, id) ON DELETE RESTRICT
 );
 
--- The users (account_id, id) unique index supports account-scoped user lookup.
--- The usage primary keys support exact subject-and-month lookup.
--- The request_decisions primary key supports account-scoped request replay.
--- The accounts API-key unique index supports authentication lookup.
 
 -- Supports listing custom plans belonging to an account.
 CREATE INDEX plans_owner_account_id_idx

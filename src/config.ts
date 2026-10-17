@@ -5,7 +5,7 @@ const environmentSchema = z.object({
   HOST: z.string().default("0.0.0.0"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   DATABASE_URL: z.string().min(1),
-  API_KEY_PEPPER: z.string().min(16).optional()
+  API_KEY_PEPPER: z.string().min(16)
 });
 
 export type AppConfig = z.infer<typeof environmentSchema>;
