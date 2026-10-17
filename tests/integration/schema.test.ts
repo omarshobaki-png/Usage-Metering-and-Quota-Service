@@ -4,6 +4,7 @@ import { Pool } from "pg";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { runMigrations } from "../../src/db/migrate.js";
+import { MAX_QUANTITY } from "../../src/shared/validation.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
 
@@ -31,7 +32,8 @@ let firstMigrationRun: string[];
 async function insertDecision(
   accountId: string,
   requestId: string,
-  userId: string
+  userId: string,
+  requestedUnits = 1
 ): Promise<void> {
   await testPool.query(
     `
@@ -49,9 +51,9 @@ async function insertDecision(
         user_plan_revision,
         decision_snapshot
       )
-      VALUES ($1, $2, $3, 1, '2026-10-01', true, 'accepted', $4, $5, 1, 1, '{}')
+      VALUES ($1, $2, $3, $6, '2026-10-01', true, 'accepted', $4, $5, 1, 1, '{}')
     `,
-    [accountId, requestId, userId, accountPlanId, userPlanId]
+    [accountId, requestId, userId, accountPlanId, userPlanId, requestedUnits]
   );
 }
 
@@ -146,6 +148,125 @@ describe("database schema", () => {
         `
       )
     ).rejects.toMatchObject({ code: "23514" });
+  });
+
+  it.each([0, MAX_QUANTITY])(
+    "round-trips limits and both usage totals of %s as exact JavaScript numbers",
+    async (quantity) => {
+      await testPool.query(
+        `
+          UPDATE plans
+          SET monthly_limit = $1, max_units_per_request = $1
+          WHERE id = $2
+        `,
+        [quantity, accountPlanId]
+      );
+      await testPool.query(
+        `
+          INSERT INTO account_monthly_usage (
+            account_id, usage_month, consumed_units
+          )
+          VALUES ($1, '2026-10-01', $2)
+        `,
+        [accountAId, quantity]
+      );
+      await testPool.query(
+        `
+          INSERT INTO user_monthly_usage (
+            account_id, user_id, usage_month, consumed_units
+          )
+          VALUES ($1, $2, '2026-10-01', $3)
+        `,
+        [accountAId, userAId, quantity]
+      );
+
+      const stored = await testPool.query<{ quantity: number }>(
+        `
+          SELECT monthly_limit AS quantity FROM plans WHERE id = $1
+          UNION ALL
+          SELECT max_units_per_request FROM plans WHERE id = $1
+          UNION ALL
+          SELECT consumed_units FROM account_monthly_usage WHERE account_id = $2
+          UNION ALL
+          SELECT consumed_units FROM user_monthly_usage WHERE user_id = $3
+        `,
+        [accountPlanId, accountAId, userAId]
+      );
+
+      expect(stored.rows).toEqual([
+        { quantity },
+        { quantity },
+        { quantity },
+        { quantity }
+      ]);
+    }
+  );
+
+  it.each([1, MAX_QUANTITY])(
+    "round-trips decision units of %s as an exact JavaScript number",
+    async (requestedUnits) => {
+      await insertDecision(accountAId, "numeric-boundary", userAId, requestedUnits);
+
+      const stored = await testPool.query<{ requestedUnits: number }>(
+        `
+          SELECT requested_units AS "requestedUnits"
+          FROM request_decisions
+          WHERE account_id = $1 AND request_id = 'numeric-boundary'
+        `,
+        [accountAId]
+      );
+
+      expect(stored.rows).toEqual([{ requestedUnits }]);
+    }
+  );
+
+  it.each([
+    {
+      field: "plan monthly limit",
+      sql: "UPDATE plans SET monthly_limit = $1 WHERE id = $2",
+      parameters: [MAX_QUANTITY + 1, accountPlanId]
+    },
+    {
+      field: "plan per-request limit",
+      sql: "UPDATE plans SET max_units_per_request = $1 WHERE id = $2",
+      parameters: [MAX_QUANTITY + 1, accountPlanId]
+    },
+    {
+      field: "account monthly usage",
+      sql: `
+        INSERT INTO account_monthly_usage (
+          account_id, usage_month, consumed_units
+        )
+        VALUES ($1, '2026-10-01', $2)
+      `,
+      parameters: [accountAId, MAX_QUANTITY + 1]
+    },
+    {
+      field: "user monthly usage",
+      sql: `
+        INSERT INTO user_monthly_usage (
+          account_id, user_id, usage_month, consumed_units
+        )
+        VALUES ($1, $2, '2026-10-01', $3)
+      `,
+      parameters: [accountAId, userAId, MAX_QUANTITY + 1]
+    },
+    {
+      field: "decision requested units",
+      sql: `
+        INSERT INTO request_decisions (
+          account_id, request_id, user_id, requested_units, processed_month,
+          accepted, decision_reason, account_plan_id, user_plan_id,
+          account_plan_revision, user_plan_revision, decision_snapshot
+        )
+        VALUES ($1, 'overflow', $2, $3, '2026-10-01', true, 'accepted', $4, $5, 1, 1, '{}')
+      `,
+      parameters: [accountAId, userAId, MAX_QUANTITY + 1, accountPlanId, userPlanId]
+    }
+  ])("rejects overflow in $field instead of rounding", async ({ sql, parameters }) => {
+    await expect(testPool.query(sql, parameters)).rejects.toMatchObject({
+      code: "22003"
+    });
   });
 
   it("rejects foreign-key references to missing users", async () => {
