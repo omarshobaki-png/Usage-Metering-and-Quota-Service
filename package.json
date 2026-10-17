@@ -14,8 +14,8 @@
     "db:init": "node --env-file-if-exists=.env --import tsx src/db/initialize.ts",
     "account:create": "node --env-file-if-exists=.env --import tsx scripts/create-account.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest"
+    "test": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs run --passWithNoTests",
+    "test:watch": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs"
   },
   "engines": {
     "node": ">=22 <23"
