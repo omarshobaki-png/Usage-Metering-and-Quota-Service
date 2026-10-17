@@ -5,11 +5,42 @@ import {
   verifyDatabaseConnection,
   waitForDatabase
 } from "./db/pool.js";
+import { createApiKeyAuthenticator } from "./middleware/authenticate-api-key.js";
+import {
+  assignAccountPlan,
+  assignUserPlan
+} from "./modules/plans/assignment.js";
+import {
+  createCustomPlan,
+  getPlan,
+  listPlans,
+  updateCustomPlan
+} from "./modules/plans/service.js";
+import { createUser, getUser } from "./modules/users/service.js";
 
 const config = loadConfig();
 const pool = createPool(config.DATABASE_URL);
 const app = buildApp({
-  checkDatabase: async () => verifyDatabaseConnection(pool)
+  checkDatabase: async () => verifyDatabaseConnection(pool),
+  authenticateAccount: createApiKeyAuthenticator(pool, config.API_KEY_PEPPER),
+  userOperations: {
+    createUser: async (accountId, input) => createUser(pool, accountId, input),
+    getUser: async (accountId, userId) => getUser(pool, accountId, userId)
+  },
+  planOperations: {
+    createCustomPlan: async (accountId, input) =>
+      createCustomPlan(pool, accountId, input),
+    listPlans: async (accountId, scope) => listPlans(pool, accountId, scope),
+    getPlan: async (accountId, planId) => getPlan(pool, accountId, planId),
+    updateCustomPlan: async (accountId, planId, input) =>
+      updateCustomPlan(pool, accountId, planId, input)
+  },
+  assignmentOperations: {
+    assignAccountPlan: async (accountId, planId) =>
+      assignAccountPlan(pool, accountId, planId),
+    assignUserPlan: async (accountId, userId, planId) =>
+      assignUserPlan(pool, accountId, userId, planId)
+  }
 });
 
 pool.on("error", () => {

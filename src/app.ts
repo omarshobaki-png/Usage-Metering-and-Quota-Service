@@ -1,5 +1,27 @@
 import Fastify, { type FastifyInstance } from "fastify";
 
+import {
+  createAuthenticateApiKeyHook,
+  type AuthenticateAccount
+} from "./middleware/authenticate-api-key.js";
+import {
+  registerUserRoutes,
+  type UserRouteOperations
+} from "./modules/users/routes.js";
+import {
+  registerPlanRoutes,
+  type PlanRouteOperations
+} from "./modules/plans/routes.js";
+import {
+  registerAssignmentRoutes,
+  type AssignmentRouteOperations
+} from "./modules/plans/assignment-routes.js";
+import {
+  registerConsumptionRoutes,
+  type ConsumptionRouteOperations
+} from "./modules/usage/routes.js";
+import { AppError } from "./shared/errors.js";
+
 export const JSON_BODY_LIMIT_BYTES = 1_048_576;
 
 interface LoggerOptions {
@@ -11,6 +33,11 @@ interface LoggerOptions {
 
 export interface BuildAppOptions {
   checkDatabase: () => Promise<void>;
+  authenticateAccount: AuthenticateAccount;
+  userOperations: UserRouteOperations;
+  planOperations?: PlanRouteOperations;
+  assignmentOperations?: AssignmentRouteOperations;
+  consumptionOperations?: ConsumptionRouteOperations;
   logger?: false | LoggerOptions;
 }
 
@@ -60,6 +87,8 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     bodyLimit: JSON_BODY_LIMIT_BYTES
   });
 
+  app.decorateRequest("authenticatedAccount", null);
+
   app.addHook("onRequest", async (request, reply) => {
     reply.header("x-request-id", request.id);
   });
@@ -78,6 +107,37 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           "The database is currently unavailable."
         )
       });
+    }
+  });
+
+  app.register(async (tenantRoutes) => {
+    tenantRoutes.addHook(
+      "preHandler",
+      createAuthenticateApiKeyHook(options.authenticateAccount)
+    );
+
+    tenantRoutes.get("/account", async (request) => {
+      const account = request.authenticatedAccount;
+
+      if (account === null) {
+        throw new Error("Authenticated account context is missing.");
+      }
+
+      return { account };
+    });
+
+    registerUserRoutes(tenantRoutes, options.userOperations);
+
+    if (options.planOperations !== undefined) {
+      registerPlanRoutes(tenantRoutes, options.planOperations);
+    }
+
+    if (options.assignmentOperations !== undefined) {
+      registerAssignmentRoutes(tenantRoutes, options.assignmentOperations);
+    }
+
+    if (options.consumptionOperations !== undefined) {
+      registerConsumptionRoutes(tenantRoutes, options.consumptionOperations);
     }
   });
 
@@ -102,6 +162,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       typeof error.statusCode === "number"
         ? error.statusCode
         : undefined;
+
+    if (error instanceof AppError) {
+      return reply
+        .status(error.statusCode)
+        .send(errorResponse(request.id, error.code, error.message));
+    }
 
     if (errorCode === "FST_ERR_CTP_INVALID_JSON_BODY") {
       return reply
