@@ -15,7 +15,7 @@ export async function withLockedAccountTransaction<T>(
   const client = await pool.connect();
 
   try {
-    await client.query("BEGIN");
+    await client.query("BEGIN ISOLATION LEVEL READ COMMITTED");
 
     const accountResult = await client.query<{ id: string }>(
       "SELECT id FROM accounts WHERE id = $1 FOR UPDATE",
