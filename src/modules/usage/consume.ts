@@ -78,6 +78,8 @@ export async function consume(
       return null;
     }
 
+    // The account lock makes lookup + insertion one serialized operation.
+    // IDs span every user and month of this account, not just the current bucket.
     const existingResult = await client.query<ExistingDecision>(
       `
         SELECT
@@ -92,10 +94,13 @@ export async function consume(
     const existing = existingResult.rows[0];
 
     if (existing !== undefined) {
+      // Compare normalized semantic fields, never JSON text or property order.
       if (existing.userId !== input.userId || existing.units !== input.units) {
         throw new RequestIdConflictError();
       }
 
+      // Rejections are final too. Replay before reading current rules/time or
+      // initializing buckets so later months and plan edits cannot change history.
       return parseConsumptionSnapshot(existing.snapshot).response;
     }
 
