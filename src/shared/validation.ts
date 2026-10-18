@@ -31,6 +31,23 @@ export const planListQuerySchema = z.strictObject({
   scope: planScopeSchema.optional()
 });
 
+export const usageMonthSchema = z.string().length(7).regex(/^(?!0000)[0-9]{4}-(0[1-9]|1[0-2])$/);
+
+export const usageQuerySchema = z.strictObject({
+  month: usageMonthSchema.optional()
+});
+
+export const currentRulesQuerySchema = z.strictObject({});
+
+export const historyQuerySchema = z.strictObject({
+  limit: z.string().regex(/^(?:[1-9]|[1-9][0-9]|100)$/).transform(Number).default(20),
+  userId: userIdSchema.optional(),
+  month: usageMonthSchema.optional(),
+  cursor: z.string().min(1).max(1024).regex(/^[A-Za-z0-9_-]+$/).optional()
+});
+
+export type HistoryQuery = z.infer<typeof historyQuerySchema>;
+
 export const createUserBodySchema = z.strictObject({
   planId: planIdSchema.optional()
 });

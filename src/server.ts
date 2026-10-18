@@ -17,6 +17,14 @@ import {
   updateCustomPlan
 } from "./modules/plans/service.js";
 import { createUser, getUser } from "./modules/users/service.js";
+import { consume } from "./modules/usage/consume.js";
+import { readHistory } from "./modules/usage/history.js";
+import {
+  readAccountUsage,
+  readUserUsage,
+  readAccountRules,
+  readUserRules
+} from "./modules/usage/queries.js";
 
 const config = loadConfig();
 const pool = createPool(config.DATABASE_URL);
@@ -40,6 +48,20 @@ const app = buildApp({
       assignAccountPlan(pool, accountId, planId),
     assignUserPlan: async (accountId, userId, planId) =>
       assignUserPlan(pool, accountId, userId, planId)
+  },
+  consumptionOperations: {
+    consume: async (accountId, input) => consume(pool, accountId, input)
+  },
+  usageOperations: {
+    readAccountUsage: async (accountId, month) => readAccountUsage(pool, accountId, month),
+    readUserUsage: async (accountId, userId, month) => readUserUsage(pool, accountId, userId, month)
+  },
+  ruleOperations: {
+    readAccountRules: async (accountId) => readAccountRules(pool, accountId),
+    readUserRules: async (accountId, userId) => readUserRules(pool, accountId, userId)
+  },
+  historyOperations: {
+    readHistory: async (accountId, query) => readHistory(pool, accountId, query)
   }
 });
 

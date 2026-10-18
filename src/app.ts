@@ -21,6 +21,18 @@ import {
   type ConsumptionRouteOperations
 } from "./modules/usage/routes.js";
 import { AppError } from "./shared/errors.js";
+import {
+  registerHistoryRoutes,
+  type HistoryRouteOperations
+} from "./modules/usage/history-routes.js";
+import {
+  registerRuleRoutes,
+  type RuleRouteOperations
+} from "./modules/plans/inspection-routes.js";
+import {
+  registerUsageRoutes,
+  type UsageRouteOperations
+} from "./modules/usage/query-routes.js";
 
 export const JSON_BODY_LIMIT_BYTES = 1_048_576;
 
@@ -38,6 +50,9 @@ export interface BuildAppOptions {
   planOperations?: PlanRouteOperations;
   assignmentOperations?: AssignmentRouteOperations;
   consumptionOperations?: ConsumptionRouteOperations;
+  usageOperations?: UsageRouteOperations;
+  ruleOperations?: RuleRouteOperations;
+  historyOperations?: HistoryRouteOperations;
   logger?: false | LoggerOptions;
 }
 
@@ -138,6 +153,18 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
 
     if (options.consumptionOperations !== undefined) {
       registerConsumptionRoutes(tenantRoutes, options.consumptionOperations);
+    }
+
+    if (options.usageOperations !== undefined) {
+      registerUsageRoutes(tenantRoutes, options.usageOperations);
+    }
+
+    if (options.ruleOperations !== undefined) {
+      registerRuleRoutes(tenantRoutes, options.ruleOperations);
+    }
+
+    if (options.historyOperations !== undefined) {
+      registerHistoryRoutes(tenantRoutes, options.historyOperations);
     }
   });
 

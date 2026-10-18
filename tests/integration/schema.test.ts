@@ -117,7 +117,8 @@ describe("database schema", () => {
   it("applies the initial migration once and preserves rows on a repeated run", async () => {
     expect(firstMigrationRun).toEqual([
       "initial_schema.sql",
-      "modification_1_plan_ids_as_integers.sql"
+      "modification_1_plan_ids_as_integers.sql",
+      "modification_2_decision_history_sequence.sql"
     ]);
     await expect(runMigrations(testPool)).resolves.toEqual([]);
 
