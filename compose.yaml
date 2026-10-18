@@ -28,7 +28,7 @@ services:
       HOST: 0.0.0.0
       PORT: 3000
       DATABASE_URL: postgres://usage_metering:usage_metering_dev@db:5432/usage_metering
-      API_KEY_PEPPER: local-compose-pepper-change-me
+      API_KEY_PEPPER: ${API_KEY_PEPPER:?Set API_KEY_PEPPER in .env before starting Docker}
     ports:
       - "${API_PORT:-3000}:3000"
     healthcheck:
@@ -52,7 +52,7 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: postgres://usage_metering:usage_metering_dev@db:5432/usage_metering
-      API_KEY_PEPPER: local-compose-pepper-change-me
+      API_KEY_PEPPER: ${API_KEY_PEPPER:?Set API_KEY_PEPPER in .env before starting Docker}
     command: ["node", "dist/src/db/initialize.js"]
 
 volumes:
