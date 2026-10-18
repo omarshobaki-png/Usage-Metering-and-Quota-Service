@@ -1,0 +1,64 @@
+# Used only by scripts/verify-reliability.ts with a unique project name.
+# No fixed host ports, external volumes, or references to the development stack.
+services:
+  db:
+    image: postgres:17.6-bookworm
+    environment:
+      POSTGRES_DB: quota_reliability
+      POSTGRES_USER: quota_reliability
+      POSTGRES_PASSWORD: reliability-local-only
+    ports:
+      - target: 5432
+        published: "0"
+        host_ip: 127.0.0.1
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quota_reliability -d quota_reliability"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  init:
+    image: ${RELIABILITY_API_IMAGE:?Set by the reliability runner}
+    build:
+      context: .
+      target: runtime
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://quota_reliability:reliability-local-only@db:5432/quota_reliability
+      API_KEY_PEPPER: reliability-local-only-pepper
+    command: ["node", "dist/src/db/initialize.js"]
+
+  api:
+    image: ${RELIABILITY_API_IMAGE:?Set by the reliability runner}
+    build:
+      context: .
+      target: runtime
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgres://quota_reliability:reliability-local-only@db:5432/quota_reliability
+      API_KEY_PEPPER: reliability-local-only-pepper
+    ports:
+      - target: 3000
+        published: "0"
+        host_ip: 127.0.0.1
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  postgres_data:
