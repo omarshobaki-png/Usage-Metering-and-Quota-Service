@@ -1,330 +1,499 @@
 # Usage Metering and Quota Service
 
-A TypeScript and PostgreSQL service that records usage and enforces account-level and user-level quotas.
+A TypeScript HTTP API that meters **document-processing units** and enforces
+shared account quotas and individual user quotas. PostgreSQL persists accounts,
+plans, assignments, monthly usage, and accepted/rejected decisions.
 
-## Project status
+- [Quick start](#quick-start)
+- [Example client](#example-client-walkthrough)
+- [Try the API](#try-the-api)
+- [Behavior and design](#behavior-and-design)
+- [Architecture and data model](#architecture-and-data-model)
+- [Tests](#tests)
+- [Performance](#performance)
+- [Configuration and troubleshooting](#configuration-and-troubleshooting)
 
-The strict TypeScript workspace, Dockerized PostgreSQL/API foundation, initial database schema, automatic predefined-plan setup, secure account provisioning, persistent API-key authentication, tenant-isolated user routes, strict request validation, account-owned custom-plan management, safe account/user plan assignment, and the stable consumption API contract are in place. The quota evaluator and database-backed consumption transaction, usage/history routes, completed demo client, and performance scenarios will be added in the next milestones.
+The detailed references are [API](docs/api.md) and [performance](docs/performance.md).
 
-## Development setup
+## Quick start
 
-Use Node.js 22 LTS. The repository pins that major version in `.nvmrc` and `package.json` and includes `package-lock.json` for reproducible installs.
+Prerequisites: Docker Engine/Desktop running with Docker Compose v2+ and Linux
+containers; curl 7.76+ for host HTTP checks. On Windows, WSL2/Ubuntu is the supported
+shell for the Bash examples and host verification scripts. Run commands from the repository root.
+
+1. Copy the example configuration once; do not overwrite an existing private file.
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   In `.env`, replace `API_KEY_PEPPER` with a private random value of at least
+   16 characters. Keep it stable after issuing keys. For example, generate one
+   locally with the pinned image (keep the output private):
+
+   ```bash
+   docker run --rm node:22.22.1-bookworm-slim node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+   ```
+
+   The provided database password/URL are **local-demo credentials**, not production
+   secrets or a secure deployment configuration. Never commit `.env` or issued keys.
+   PowerShell users can use `Copy-Item .env.example .env` for the copy step.
+
+2. Start everything with the required full-stack command:
+
+   ```bash
+   docker compose up --build
+   ```
+
+   Startup order is database healthy → migrations/seeds finish → API healthy →
+   demo. The demo creates a fresh account/key in memory, demonstrates acceptance,
+   user/account rejection, a plan update and an immutable retry, then prints
+   `Demo completed successfully.` and exits **0**. `init` also exits 0 normally;
+   `api` and `db` keep running. There is no browser UI: the example is a CLI client.
+
+3. In a second terminal:
+
+   ```bash
+   docker compose ps --all
+   docker compose logs demo
+   curl --fail-with-body http://localhost:3000/health
+   ```
+
+   Health returns `{"status":"ok","database":"reachable"}` with HTTP 200.
+   The default example finishes at account **31 consumed / 19 remaining**;
+   Premium has **27 / 3**. [Scenario details](#example-client-walkthrough).
+
+For background operation, `docker compose up -d --build` is the alternative;
+still check `docker compose ps --all` and demo logs for its successful exit.
+To run another **fresh** example without resetting data:
 
 ```bash
-nvm use
-npm ci
-cp .env.example .env
+docker compose run --rm demo
 ```
 
-Replace the placeholder values in `.env` for your local environment. `DATABASE_URL` is required; startup fails with a `ConfigurationError` that identifies the missing setting. Set `API_KEY_PEPPER` to a private random value of at least 16 characters before provisioning accounts, and keep the same value so later API-key authentication can reproduce stored digests.
+Use `docker compose down` then `docker compose up --build` to recreate containers
+with the same volume. Keep the project name and pepper stable to preserve working
+keys. `down --volumes` intentionally deletes the database, history, and retry
+protection. Ctrl+C stops foreground services; another `up` starts them again.
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Run the TypeScript server in watch mode during development. |
-| `npm run typecheck` | Check the source with strict TypeScript without emitting files. |
-| `npm run build` | Compile the project into `dist/`. |
-| `npm start` | Run the compiled server. |
-| `npm run db:check` | Run the compiled bounded PostgreSQL `SELECT 1` diagnostic. |
-| `npm run db:migrate` | Apply pending PostgreSQL migrations. |
-| `npm run db:seed` | Insert any missing predefined plans without changing existing rows. |
-| `npm run db:init` | Apply migrations and then seed predefined plans. |
-| `npm run account:create -- --name "Example Company"` | Create an account on Starter and reveal its API key once. |
-| `npm test` | Run the automated test suite once. |
-| `npm run test:watch` | Re-run tests as files change. |
+## Example client walkthrough
 
-The schema, seed, and account-provisioning integration tests require `TEST_DATABASE_URL` (or `DATABASE_URL`) to point to a disposable PostgreSQL database where the configured user may create and drop isolated schemas. For example:
+The client is a separate HTTP caller, not a browser frontend. It creates its
+plans/users through the authenticated API and checks the returned decisions and
+balances. Only initial account/key provisioning uses operator database access.
 
-```bash
-TEST_DATABASE_URL=postgres://usage_metering:usage_metering_dev@localhost:5432/usage_metering npm test
-```
+The demo creates one account and two users with these custom plans:
 
-Each integration suite uses a unique temporary schema and removes only that schema when it finishes.
-
-## Docker Compose and PostgreSQL
-
-Start the current API and PostgreSQL stack with:
-
-```bash
-docker compose up --build
-```
-
-Compose exposes the API on `http://localhost:3000` and PostgreSQL on `localhost:5432` by default. Set `API_PORT` or `POSTGRES_PORT` before starting Compose if either host port is already occupied.
-
-The database uses the named `postgres_data` volume. PostgreSQL must pass its `pg_isready` health check before Compose runs the one-time `init` service. That service applies migrations and inserts missing predefined plans. The API starts only after initialization succeeds, then performs its own bounded `SELECT 1` readiness check before listening. Compose checks the API's `GET /health` route and marks the API healthy only when that route returns a successful response.
-
-Inside Compose, the API connects to `db:5432` because `db` is the database service name. `localhost` inside the API container would refer to the API container itself. The `.env.example` URL uses `localhost:5432` because it is intended for commands run directly on the host machine.
-
-In another terminal, inspect readiness and run the diagnostic:
-
-```bash
-docker compose ps
-curl http://localhost:3000/health
-docker compose run --rm api npm run db:check
-```
-
-When the database is reachable, the health request returns `200` with `{ "status": "ok", "database": "reachable" }`. If the running API loses its database connection, the same route returns `503` with a safe JSON error instead of exposing database details. The diagnostic succeeds with `Database connection successful: SELECT 1 returned 1.` It retries five times before returning a clear failure, so it cannot wait forever.
-
-Run `npm run db:init` outside Compose to apply the SQL files in `src/db/migrations` and insert any missing predefined plans. Applied filenames are recorded in `schema_migrations`, and each predefined plan has a fixed integer ID, so repeating initialization creates no duplicate plans and does not overwrite existing rows. Account and user IDs remain UUIDs, while plan IDs and the columns that reference them use integers. Quantities use PostgreSQL `integer` values bounded at `2,147,483,647`; `pg` returns this type as an exact JavaScript number without a custom parser.
-
-### Predefined plans
-
-| Plan | Scope | Monthly limit | Maximum per request |
+| Plan | Scope | Monthly allowance | Per-request cap |
 | --- | --- | ---: | ---: |
-| Starter | Account | 10,000 | 100 |
-| Pro | Account | 100,000 | 1,000 |
-| Basic | User | 1,000 | 20 |
-| Premium | User | 10,000 | 100 |
+| Demo Account | Account | 30, later raised to 50 | 100 |
+| Demo Basic | User | 10 | 5 |
+| Demo Premium | User | 30 | 20 |
 
-These four definitions are global plans, represented by rows whose `owner_account_id` is `NULL`. Normal startup inserts a missing definition but never updates an existing plan, assignment, usage row, or decision. A deliberate future change to a predefined plan should be made through a migration rather than by silently resetting seed data.
+| Action | Decision | Account consumed / remaining | Relevant user consumed / remaining |
+| --- | --- | --- | --- |
+| Basic requests 4 | Accepted | 4 / 26 | Basic: 4 / 6 |
+| Basic requests 6 | Rejected: user request cap 5 | 4 / 26 | Basic: 4 / 6 |
+| Premium requests 20 | Accepted | 24 / 6 | Premium: 20 / 10 |
+| Premium requests 7 | Rejected: account monthly cap 30 | 24 / 6 | Premium: 20 / 10 |
+| Raise account limit to 50; Premium requests 7 with a new ID | Accepted | 31 / 19 | Premium: 27 / 3 |
+| Retry the earlier rejected ID | Original rejection replayed | Snapshot: 24 / 6 | Snapshot: Premium 20 / 10 |
 
-### Provision an account and issue its API key
+The final retry does not undo the upgrade or change usage: it returns an old
+decision. A separate live usage query still shows account **31 / 19** and
+Premium **27 / 3**. Five new actions produce five history entries; the replay
+does not produce a sixth. See the [captured client output](demo/transcript.txt);
+timestamps and the UTC month naturally change between runs.
 
-Account provisioning is an operator command rather than a public HTTP endpoint. Initialize the database, configure `DATABASE_URL` and `API_KEY_PEPPER` in the untracked `.env` file, then run:
+The client simulates document processing only for accepted actions and skips
+work on its explicit replay step.
 
-```bash
-npm run account:create -- --name "Example Company"
-```
+### Optional host execution
 
-Starter is the default account plan. Select another predefined account plan explicitly with `--plan`:
-
-```bash
-npm run account:create -- --name "Example Company" --plan Pro
-```
-
-The command generates 32 cryptographically random bytes, encodes them in a header-safe `umq_...` key, and reveals that raw key once. PostgreSQL stores only an HMAC-SHA-256 digest created with `API_KEY_PEPPER`. Save the displayed key in an untracked secret store and later supply it to clients through environment configuration; do not put it in source files, command output captures, or normal application logs. Losing the raw key requires issuing a replacement in a future key-rotation flow because the digest cannot recover it.
-
-Provisioning validates the selected plan and inserts the account plus its initial plan assignment in one transaction. `Starter` and `Pro` are valid; `Basic` and `Premium` are user-scope plans and are rejected without leaving a partial account. Ordinary API and database restarts do not recreate accounts or rotate keys.
-
-### Account-owned users
-
-The user data layer creates opaque UUID-based users that always belong to one account and have one eligible user-scope plan. Basic is the default; Premium or an account-owned custom user plan may be selected explicitly. Account-scope plans and custom plans owned by another account are rejected without leaving partial rows.
-
-User mutations begin a transaction, lock the owning account row first with `SELECT ... FOR UPDATE`, validate the plan in a later statement, write the user, and then commit. Failure paths roll back and always release the checked-out connection. This account-first order is shared infrastructure for later assignment and quota mutations.
-
-Every lookup requires both `accountId` and `userId`, so asking account A for an account B user returns not found. The public data representation contains the user ID, owning account ID, creation time, and current plan summary. This project does not currently use user display names. API-key digests and internal SQL details are never part of a user result. HTTP authentication and user routes are added in later tasks.
-
-### Data integrity enforcement
-
-PostgreSQL constraints protect structural invariants even if application code contains a bug:
-
-- primary and foreign keys require referenced accounts, users, and plans to exist;
-- `(account_id, request_id)` uniquely identifies a consumption decision within one account while allowing another account to reuse the same request ID;
-- composite account/user foreign keys prevent usage and decision rows from connecting one account to another account's user;
-- checks restrict plan scope to `account` or `user`, require non-negative limits and usage, require positive requested units, and bound quantities at `2,147,483,647`;
-- usage rows are unique by subject and UTC month, and stored month values must be the first day of that month;
-- API-key digests are unique, while plan and decision references cannot be removed when protected historical or assignment rows still depend on them.
-
-Some ownership and ordering rules need transactional application checks because a normal foreign key proves only that a plan exists:
-
-- an account may receive only an account-scope predefined plan or an eligible custom account plan;
-- a user may receive only a user-scope predefined plan or a custom user plan owned by the same account;
-- account-scoped reads include `accountId` in the query so another account's resource is returned as not found;
-- mutations lock the account row first with `SELECT ... FOR UPDATE`, then read current plans and usage in later statements before writing;
-- later quota transactions must update account usage, user usage, and the immutable decision together, so acceptance changes both totals and rejection changes neither;
-- plan changes must preserve accumulated subject usage and historical decision snapshots.
-
-Usage belongs to the account or user rather than to the assigned plan. Multiple users may therefore share one plan definition while keeping separate monthly usage rows, and changing a plan never transfers, merges, or resets their consumed units.
-
-To verify that the named volume preserves data across an ordinary database restart, create a temporary probe row, restart PostgreSQL, read the row, and remove the probe:
+The Compose demo keeps its key in memory and requires no host Node installation.
+For host development, use Node 22, run `npm ci`, and configure your private `.env`:
 
 ```bash
-docker compose exec -T db psql -U usage_metering -d usage_metering -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS persistence_probe (message text NOT NULL); TRUNCATE persistence_probe; INSERT INTO persistence_probe VALUES ('database survived');"
-docker compose restart db
-docker compose up -d --wait db
-docker compose exec -T db psql -U usage_metering -d usage_metering -c "SELECT message FROM persistence_probe;"
-docker compose exec -T db psql -U usage_metering -d usage_metering -c "DROP TABLE persistence_probe;"
+docker compose up -d --build --wait api
+npm run config:check
+npm run demo:setup
+npm run demo:run
 ```
 
-`docker compose down` removes the containers but preserves the named volume. `docker compose down --volumes` intentionally deletes that database volume and its data.
+Setup writes the ignored, owner-readable `demo/.demo.env` with the service URL,
+issued key, custom account-plan ID, and both user IDs. Repeat **both** setup and
+run for a fresh walkthrough; replaying an accepted quota decision does not
+deduplicate a separate application's document-processing side effects.
 
-`docker compose up --build` now starts PostgreSQL, completes migrations and predefined-plan setup, and starts the API. The runnable example client will be added later.
+## Try the API
 
-### HTTP request handling
+Use **Bash, curl 7.76+** (`--fail-with-body`) and **Node 22** for these copy-paste
+examples. Keep the following blocks in the same terminal. They create a dedicated
+account and do not modify the Compose demo's account.
 
-JSON request bodies are limited to 1 MiB (1,048,576 bytes). Unknown routes return a JSON `404` response, malformed JSON returns JSON with status `400`, and oversized bodies return JSON with status `413`. Unexpected failures return a generic JSON `500` response without exposing stack traces, SQL statements, connection strings, or other internal details.
+### 1. Obtain your own account key
 
-`GET /health` is public. Tenant routes require the raw key issued by the account-provisioning command in the `X-API-Key` header. For example:
+With the stack running, use the operator-only CLI inside the API container:
 
 ```bash
-API_KEY='replace-with-the-one-time-issued-key'
-curl http://localhost:3000/account -H "X-API-Key: ${API_KEY}"
+docker compose exec -T api node dist/scripts/create-account.js --name "Reviewer account"
 ```
 
-`GET /account` returns the authenticated account ID, name, and current account-plan summary. Account identity comes only from the API key; an `accountId` supplied in a query string cannot override it. Missing, empty, malformed, and unknown keys all receive the same generic `401 Unauthorized` response. Raw keys and stored digests are never returned. The server computes the key's HMAC-SHA-256 digest using `API_KEY_PEPPER` and looks up the persisted account, so issued keys continue working across normal API restarts as long as the database and pepper are preserved.
+It creates an account on Starter and reveals its raw `umq_...` key **once**.
+Save it privately; do not share terminal captures or paste it into tracked files.
+The API never returns that key again. It is **not** the server's `API_KEY_PEPPER`.
 
-Authenticated accounts can create and read their users:
+Read the issued key into your current Bash session without putting it in history:
 
 ```bash
-curl -X POST http://localhost:3000/users \
-  -H "X-API-Key: ${API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{}'
-
-curl http://localhost:3000/users/replace-with-user-id \
-  -H "X-API-Key: ${API_KEY}"
+read -r -s -p "Issued account key: " API_KEY
+printf '\n'
+export API_KEY
 ```
 
-`POST /users` creates the user under the account authenticated by the key and defaults to Basic. An optional positive integer `planId` may select an eligible user plan. Mutation bodies reject unknown fields, so a caller-supplied `accountId` receives `400 INVALID_REQUEST` and cannot change ownership. `GET /users/:id` always queries with both the authenticated account ID and user ID. A foreign user and a nonexistent user therefore return the same `404 USER_NOT_FOUND` response without revealing whether another account owns the ID.
+The API below derives ownership solely from this key. Do not send `accountId`.
+These helper functions keep the examples short; `json_field` uses Node, not jq.
 
-Detailed payload rules and safe error examples are documented in [`docs/api.md`](docs/api.md).
+```bash
+BASE_URL="${BASE_URL:-http://localhost:3000}"
+: "${API_KEY:?Set the one-time account key first}"
 
-### Tenant-isolation coverage
+api() {
+  local path="$1"
+  shift
+  curl --fail-with-body --silent --show-error "$BASE_URL$path" \
+    -H "X-API-Key: $API_KEY" "$@"
+}
+json_field() {
+  node -e 'let v=JSON.parse(require("node:fs").readFileSync(0,"utf8")); for(const k of process.argv[1].split(".")) v=v[k]; if(v==null) throw Error("Missing JSON field"); process.stdout.write(String(v));' "$1"
+}
+api /account
+```
 
-| Tenant route area | Current evidence |
-| --- | --- |
-| Account inspection | Authenticated key-to-account tests |
-| User creation and reads | Two-account create/read isolation tests |
-| Custom plans | Authenticated create/read/update visibility and isolation tests |
-| Plan assignment | Scope, ownership, foreign-user, and preservation tests |
-| Consumption, usage, and history | Pending later metering tasks |
+### 2. Create, assign and inspect plans/users
 
-Every error uses the envelope `{ "error": { "code": "...", "message": "..." }, "correlationId": "..." }`. Fastify generates the correlation ID for each HTTP request, includes it in the `X-Request-Id` response header, and attaches the same request ID to its logs. This server-generated correlation ID is separate from the client-supplied consumption `requestId` used for safe retries.
+Custom plans belong to the authenticated account. Use returned IDs rather than
+assuming auto-increment values; account/user IDs are UUIDs and plan IDs are integers.
 
-Application logging redacts the `X-API-Key` and `Authorization` request headers as `[REDACTED]`. Smoke tests cover database-aware health responses, JSON `404` responses, malformed JSON, safe dependency-failure responses, and credential redaction.
+```bash
+ACCOUNT_PLAN_ID=$(api /plans -X POST -H "Content-Type: application/json" \
+  -d '{"name":"Reviewer account plan","scope":"account","monthlyLimit":30,"requestLimit":100}' | json_field plan.id)
+USER_PLAN_ID=$(api /plans -X POST -H "Content-Type: application/json" \
+  -d '{"name":"Reviewer user plan","scope":"user","monthlyLimit":10,"requestLimit":5}' | json_field plan.id)
 
-The server handles `SIGINT` and `SIGTERM` as graceful-shutdown requests. It stops accepting HTTP traffic, waits for Fastify to close its listener, and then closes the PostgreSQL connection pool. This is the path used by `Ctrl+C` and `docker compose stop`.
+api /account/plan -X PATCH -H "Content-Type: application/json" \
+  -d "{\"planId\":$ACCOUNT_PLAN_ID}"
+USER_ID=$(api /users -X POST -H "Content-Type: application/json" -d '{}' | json_field user.id)
+api "/users/$USER_ID/plan" -X PATCH -H "Content-Type: application/json" \
+  -d "{\"planId\":$USER_PLAN_ID}"
 
-## Core concepts
+api "/users/$USER_ID"
+api "/plans?scope=user"
+api "/plans/$ACCOUNT_PLAN_ID"
+api /account/rules
+api "/users/$USER_ID/rules"
+```
 
-The service meters one resource: **document-processing units**.
+User creation defaults to Basic when `planId` is omitted. Supplying
+`{"planId":RETURNED_USER_PLAN_ID}` during creation is also supported.
+Sharing a user-plan definition does **not** share those users' usage counters.
 
-| Concept | Meaning |
-| --- | --- |
-| Account | An application or company that calls the service. Its plan limits usage shared by all of its users. |
-| User | A user registered under an account. The user's plan defines individual limits. |
-| Plan | A named set of configurable quota rules assignable to an account or user. |
-| Consumption decision | The accepted or rejected result of a request to consume a positive whole number of units for a user. |
+### 3. Consume, reject, change a plan and retry
 
-## Core accounting invariant
+```bash
+FIRST_JSON=$(api /consume -X POST -H "Content-Type: application/json" \
+  -d "{\"userId\":\"$USER_ID\",\"units\":4,\"requestId\":\"review-accepted-1\"}")
+printf '%s\n' "$FIRST_JSON"
 
-An accepted action adds the same number of units to the user total and the account total for the current UTC calendar month. The account total is the sum of accepted usage across its users for that month. These totals are two views of one action, not two separate charges.
+# Valid retry: identical original response, no second charge.
+REPLAY_JSON=$(api /consume -X POST -H "Content-Type: application/json" \
+  -d "{\"userId\":\"$USER_ID\",\"units\":4,\"requestId\":\"review-accepted-1\"}")
+node -e 'require("node:assert/strict").deepEqual(JSON.parse(process.argv[1]),JSON.parse(process.argv[2]));' "$FIRST_JSON" "$REPLAY_JSON"
 
-A rejected action adds zero units at both levels.
+# Quota rejection is HTTP 200; user per-request cap is 5.
+api /consume -X POST -H "Content-Type: application/json" \
+  -d "{\"userId\":\"$USER_ID\",\"units\":6,\"requestId\":\"review-rejected-2\"}"
 
-For example, if an account has 30 units remaining and a user has 10 remaining, accepting a 4-unit request leaves the account with 26 and the user with 6. If the account has 5 remaining and a user has 20, a 10-unit request is rejected and both totals remain unchanged.
+api "/plans/$ACCOUNT_PLAN_ID" -X PATCH -H "Content-Type: application/json" \
+  -d '{"monthlyLimit":50}'
+api "/plans/$USER_PLAN_ID" -X PATCH -H "Content-Type: application/json" \
+  -d '{"requestLimit":10}'
 
-## Required behavior and implementation choices
+# Same rejected ID remains rejected under its original rules.
+api /consume -X POST -H "Content-Type: application/json" \
+  -d "{\"userId\":\"$USER_ID\",\"units\":6,\"requestId\":\"review-rejected-2\"}"
 
-The project requires TypeScript, PostgreSQL, one metered resource, account API keys, account and user plans, monthly allowances, maximum units per request, persistent history, safe retries, concurrent-request correctness, and a full-stack Docker Compose command.
+# A NEW ID evaluates the new rules and accepts 6.
+api /consume -X POST -H "Content-Type: application/json" \
+  -d "{\"userId\":\"$USER_ID\",\"units\":6,\"requestId\":\"review-new-3\"}"
+```
 
-Route names, framework details, database schema, HTTP status choices, pagination format, rule-evaluation order, and other unspecified behavior are implementation decisions. Each material decision and its reasoning will be documented here as it is made.
+Expected sequence: accept 4 → replay that acceptance → reject 6 by the user
+per-request rule → update both plans → replay the original rejection → accept
+6 with a new ID. Final live usage is account **10 / 40 remaining**, user
+**10 / 0 remaining**. There are exactly **three** history decisions, not five.
+A response contains `accepted`, `blockedBy`, `requestId`, `userId`, `units`,
+`processedAt`, `month`, and account/user balances with applied plan IDs/revisions.
+[Full response examples](docs/api.md#consumption-contract).
 
-## Product decisions
+### 4. Read current/past usage and page history
 
-These decisions define the API contract that later implementation and tests will follow.
+```bash
+api /usage
+api "/users/$USER_ID/usage"
+PREVIOUS_MONTH=$(node -e 'const d=new Date(); console.log(new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-1,1)).toISOString().slice(0,7))')
+api "/usage?month=$PREVIOUS_MONTH"
+api "/users/$USER_ID/usage?month=$PREVIOUS_MONTH"
 
-### Provisioning and authentication
+PAGE=$(api "/history?limit=1&userId=$USER_ID")
+printf '%s\n' "$PAGE"
+CURSOR=$(printf '%s' "$PAGE" | json_field nextCursor)
+api "/history?limit=1&userId=$USER_ID&cursor=$CURSOR"
+```
 
-- Accounts and their initial API keys are created through an operator CLI. This keeps account provisioning outside the customer-facing HTTP API.
-- Authenticated HTTP endpoints require an `X-API-Key` header. The service derives the account from that key; callers cannot select another account by including an `accountId` in a request body or query string.
-- A missing or invalid API key returns `401 Unauthorized`. A resource that is missing or belongs to another account returns `404 Not Found`, which avoids revealing another account's data.
+This fixture has zero usage in the previous month. Noncurrent usage contains
+consumption only; history retains original rules and balances. Continue with
+`nextCursor` and the same user/month filters until it is `null`. Later inserts
+stay outside that cursor session. Repeat the walkthrough with fresh accounts/IDs.
 
-### Months, usage, and plan changes
+## Behavior and design
 
-- Monthly allowances use UTC calendar months, identified as `YYYY-MM`. A new UTC month starts with zero usage while earlier months remain available for queries.
-- Consume decisions are immutable historical snapshots. They retain the result, reason, applied rules, and balances recorded when the request was first decided.
-- Usage and plan-inspection endpoints show the plans currently assigned. Remaining allowance is calculated as `max(0, current monthly limit - consumed)`.
-- Updating or switching a plan affects later requests but never resets usage or rewrites earlier decisions. For example, after consuming 12 units, lowering the monthly limit to 10 leaves `consumed = 12` and reports `remaining = 0`.
+### Accounting and plans
 
-### Request identifiers and safe retries
+An account represents a calling company/application; each user belongs to one
+account. Plans define monthly and per-request limits at account or user scope.
 
-- Every consume request supplies a caller-generated `requestId`. It is scoped to the authenticated account and must contain 1–128 characters from letters, digits, `.`, `_`, `:`, and `-` (the pattern `^[A-Za-z0-9._:-]{1,128}$`). Two accounts may therefore use the same identifier independently.
-- Repeating the same account, `requestId`, `userId`, and `units` returns the original recorded response without consuming units again. This applies to accepted and quota-rejected decisions.
-- Reusing an account's `requestId` with a different `userId` or `units` returns `409 Conflict` and creates no new decision or usage.
-- A replay stays historical even if a plan changes. If a request was rejected and its allowance is later increased, retrying the same ID and payload returns the original rejection; the caller needs a new request ID for a new decision.
+```text
+account monthly consumption = sum of user consumption = accepted decision units
+```
 
-### Numeric and request validation
+An accepted 4-unit action adds 4 to its user and account totals. Rejection changes
+neither. Both monthly allowances and both per-request caps must permit an action.
+The first blocker is checked in this order: account per-request, user per-request,
+account monthly, then user monthly. Exact boundaries are accepted.
 
-- Consumption `units` must be a JSON number that is a positive safe integer. Plan limits must be JSON numbers that are non-negative safe integers; zero is a valid deny-all limit.
-- The largest accepted value for `units` or a plan limit is `2,147,483,647`. This bound is represented exactly by JavaScript numbers and PostgreSQL integers, and monthly quota enforcement keeps accepted totals within it.
-- Values such as `0`, `-1`, `1.5`, the string `"4"`, a missing value, or an integer above the bound are rejected with `400 Bad Request` before quota accounting.
-- Mutation bodies reject unknown fields rather than ignoring misspellings, ownership overrides, or duplicate concepts. JSON values are validated without string-to-number coercion.
-- Request IDs contain 1–128 characters from letters, digits, `.`, `_`, `:`, and `-`. Custom-plan names are trimmed, must contain 1–100 characters, and may not be blank.
-- Only a request with valid authentication, valid input, and a user owned by the authenticated account becomes a consumption decision. A valid quota rejection is recorded because it is a real decision; authentication, validation, ownership, and request-ID conflict failures are not.
+| Predefined plan | Scope | Monthly allowance | Per-request cap |
+| --- | --- | ---: | ---: |
+| Starter (ID 1) | Account | 10000 | 100 |
+| Pro (ID 2) | Account | 100000 | 1000 |
+| Basic (ID 3) | User | 1000 | 20 |
+| Premium (ID 4) | User | 10000 | 100 |
 
-### Consumption contract
+Startup inserts missing defaults without overwriting existing rows.
+Predefined plans are read-only. Custom plans belong to one account and must match
+the assignment's scope. Users sharing a plan still have independent usage.
+Edits affect every assigned user's new requests. Switches and edits preserve
+consumption and old decisions; remaining is `max(0, monthlyLimit - consumed)`.
 
-`POST /consume` accepts exactly `userId`, `units`, and `requestId`. Account
-identity always comes from `X-API-Key`. Both accepted and quota-rejected
-decisions use one response shape containing the normalized request, processing
-time and UTC month, decision-time account/user balances, applied plan IDs and
-revisions, and `blockedBy`. An acceptance has `blockedBy: null`; a rejection
-identifies its `account` or `user` scope, `monthly_limit` or
-`max_units_per_request` rule, and blocking limit.
+### Atomicity, concurrency, and UTC months
 
-A completed quota rejection is a `200` business decision and will be recorded.
-Invalid input (`400`), invalid authentication (`401`), an unknown or foreign
-user (`404`), and conflicting request-ID reuse (`409`) are API errors and do
-not alter usage or create a decision. Task 16 fixes this boundary; the pure
-rule evaluator and database-backed transaction are implemented in the
-following metering tasks. Full examples are in [`docs/api.md`](docs/api.md).
+One READ COMMITTED transaction on one checked-out connection locks the account
+with a standalone `SELECT ... FOR UPDATE` before reading mutable rules.
+Consumption, custom-plan mutations, user creation, and assignment changes
+cooperate with that account-first lock order. Independent accounts can proceed
+concurrently; requests sharing an account serialize.
 
-### Endpoint checklist
+A new consumption checks the owned user and any saved request ID, reads fresh
+assignments/plans, and captures PostgreSQL `statement_timestamp()` after the lock.
+It evaluates all rules, increments both counters on acceptance, inserts the
+decision, and commits before returning. Errors roll back all writes and release
+the connection. A plan update that commits before a waiting request acquires the
+lock is visible to that request.
 
-The API will provide endpoints for:
+The captured instant determines one UTC calendar month for both counters and
+the decision. A request queued in October but processed after the lock in
+November uses November. New months create separate buckets; old rows remain.
+Current usage/rule reads share one SQL statement snapshot for plans and counters.
 
-- inspecting the authenticated account;
-- creating and inspecting users within that account;
-- listing, creating, inspecting, and updating plans, plus assigning account and user plans;
-- consuming units with `POST /consume`;
-- querying current and previous account and user usage; and
-- reading consumption-decision history with pagination.
+### Retry and history policy
 
-Exact paths for the remaining resources and detailed request and response examples will be documented as those routes are implemented.
+Request IDs are case-sensitive and unique per account across users and months.
 
-### HTTP and decision errors
+- Same ID and normalized user/units returns the original accepted or rejected
+  response, without another charge or history row.
+- Same ID with different user/units returns 409. Other accounts may reuse the ID.
+- Plan edits, switches, restarts, and month rollover preserve saved outcomes.
+  Replayed balances are historical; use usage routes for current counters.
+- After an uncertain response, retry the same ID/payload. After a plan change,
+  use a new ID for a new decision.
+- Valid rejections enter history. Authentication, validation, missing-user, and
+  conflict errors do not create consumption decisions.
+
+History uses descending immutable BIGINT sequences, returned as decimal strings.
+A cursor fixes an upper bound and advances below the last entry, so later
+insertions do not shift continuation pages. Retain its user/month filters.
+Decision history and retry IDs have no TTL or automatic pruning.
+
+Units are integers 1–2,147,483,647; limits are integers 0–2,147,483,647.
+Zero is a valid deny-all limit. PostgreSQL integer values round-trip exactly as
+JavaScript numbers; quantity validation rejects strings, fractions, and overflow.
+
+All tenant routes require `X-API-Key`. The account comes only from authentication;
+foreign resources return the same 404 as missing resources. API keys contain
+32 random bytes; only an HMAC-SHA-256 digest is stored. The pepper stays private.
 
 | Status | Meaning |
 | --- | --- |
-| `200 OK` | A valid consumption decision, whether accepted or rejected by a quota rule. The body includes `accepted` and an explicit reason. |
-| `400 Bad Request` | Malformed JSON, an invalid request identifier, an invalid numeric value, or another invalid input. |
-| `401 Unauthorized` | The `X-API-Key` header is missing or invalid. |
-| `403 Forbidden` | A caller attempts to modify a predefined plan. |
-| `404 Not Found` | A requested resource does not exist or belongs to another account. |
-| `409 Conflict` | An account-scoped request ID is reused with a different user or quantity. |
-| `422 Unprocessable Content` | A valid plan cannot be used for the requested assignment because its account/user scope is incompatible. |
+| 200 / 201 | Successful operation or quota decision / created user or plan |
+| 400 / 401 | Invalid input / missing or invalid key |
+| 403 / 404 | Read-only predefined plan / missing or foreign resource |
+| 409 / 422 | Request-ID payload conflict / incompatible plan scope |
+| 413 / 415 | Body over 1 MiB / unsupported content type |
+| 500 / 503 | Unexpected failure / database-unavailable health response |
 
-## Delivery checklist
+Errors contain `error.code`, `error.message`, and a server `correlationId`.
+Quota rejection is HTTP 200 with `accepted: false` and `blockedBy`.
+Noncurrent-month usage exposes consumption only; historical limits remain in
+saved decisions. Full formats and validation rules are in the [API reference](docs/api.md).
 
-The final submission must include:
+## Architecture and data model
 
-- A GitHub repository containing the service, predefined plans, and straightforward setup instructions.
-- A complete Docker Compose stack containing PostgreSQL, the service, startup initialization, and a runnable example client.
-- A README covering the API, model, API keys, rules, plan changes, retry behavior, assumptions, design decisions, and known limitations.
-- Automated tests for the important behaviors, including API-key validation, account isolation, safe retries, and concurrent requests.
-- Reproducible performance tests, scripts, configuration, commands, dependencies, results, and a short explanation of what was learned.
+```text
+CLI / HTTP client → Fastify → domain rules + account-locked SQL → PostgreSQL
+```
 
-## Scope
+Strict TypeScript checks code; Zod validates runtime JSON; pg uses parameterized SQL.
 
-### In scope
+| Table | Responsibility / key |
+| --- | --- |
+| accounts | Account identity, unique key digest, account-plan assignment; UUID ID |
+| users | Account ownership and user-plan assignment; UUID ID |
+| plans | Predefined or owned definitions, account/user scope and revision; integer ID |
+| account_monthly_usage | One counter per (account, UTC month) |
+| user_monthly_usage | One counter per (user, UTC month), tied to its owning account |
+| request_decisions | Outcome, original rule/balance snapshot; unique (account, request ID) |
+| schema_migrations | Applied SQL filenames and timestamps |
 
-- One TypeScript backend service
-- One PostgreSQL database
-- One resource measured in document-processing units
-- Account-level and user-level plans
-- Account API-key authentication and account isolation
-- A small example client
-- Startup initialization, persistent request history, safe retries, concurrency tests, and performance evidence
+Composite user/account foreign keys prevent cross-account usage and decision
+rows. Unique keys prevent duplicate buckets and request IDs; SQL checks enforce
+numeric ranges, scopes, and first-day-of-month keys. Application services enforce
+eligible plan ownership/scope, predefined-plan immutability, and atomic accounting.
+Direct SQL access can bypass application-only rules.
 
-### Out of scope
+The [SQL migrations](src/db/migrations/) define exact columns and indexes.
+Migration bookkeeping is committed with each migration; repeated runs skip
+applied files. A decision stores plan IDs/revisions, processing time/month,
+outcome, blocker, original balances, and evaluated limits.
 
-- Billing and payments
-- Refunds
-- End-user login
-- Multiple resource types
-- Role-based access control
-- Distributed infrastructure
+| Directory | Purpose |
+| --- | --- |
+| src/ | HTTP/auth/error handling, accounts/users/plans/usage, database and validation |
+| scripts/ | Operator commands, configuration diagnosis, isolated verification |
+| demo/ | Runnable client, fixture setup, captured transcript |
+| tests/ | Unit, PostgreSQL integration, and concurrency tests |
+| performance/ | Load tools, diagnostic scripts, result schema and measured evidence |
+| docs/ | API reference and performance report |
 
-## Timeline
+Containers pin Node **22.22.1** and PostgreSQL **17.6-bookworm**; host Node is
+major 22 via `.nvmrc`. Use `npm ci` with the committed lockfile.
+The measured stack uses Fastify 5.12.5, pg 8.23.1, Zod 4.6.6,
+TypeScript 7.0.2, tsx 4.23.15, and Vitest 5.0.3.
 
-The estimate is 42 working hours. The dated project window is October 12-20, 2026; the brief also describes the timeline as one week.
+## Tests
 
-## Documentation to complete during implementation
+With Node 22, installed dependencies, and Docker running:
 
-- Local setup and Docker Compose
-- API authentication, endpoints, and examples
-- Consumption, retry, and concurrency behavior
-- Plan changes and UTC month handling
-- Product assumptions and design decisions
-- Automated and performance testing
-- Known limitations
+```bash
+npm ci
+npm run verify
+```
+
+The gate runs typecheck, production build, all existing tests against disposable
+PostgreSQL, actual API/database restarts, and default Compose demo/recreation.
+No development API/database or manual migrations are needed. It stops at the
+first failure and redacts credentials from child output.
+
+| Coverage | Existing evidence |
+| --- | --- |
+| Four rules, boundaries, invalid units, zero limits and overflow | [Evaluator tests](tests/unit/evaluate-rules.test.ts), [consume tests](tests/integration/consume.test.ts) |
+| Authentication and two-account isolation across tenant routes | [Tenant matrix](tests/integration/tenant-matrix.test.ts) |
+| Replay, payload conflicts, last-unit and duplicate-request races | [Idempotency tests](tests/integration/idempotency.test.ts), [concurrency tests](tests/concurrency/last-units.test.ts) |
+| Live plan edits/switches and both controlled update/consume orders | [Plan-change tests](tests/integration/plan-changes.test.ts) |
+| UTC rollover, historical reads and stable pagination | [Month tests](tests/integration/month-rollover.test.ts), [history tests](tests/integration/history.test.ts) |
+| Rollback faults and lost committed responses | [Recovery tests](tests/integration/failure-recovery.test.ts) |
+| Real API/database restarts and reconciling new writes | [Reliability runner](scripts/verify-reliability.ts) |
+| Fresh Compose demo and retained-volume recreation | [Compose runner](scripts/verify-compose-demo.ts) |
+
+Each gate uses uniquely named Compose projects, random localhost ports, fresh
+volumes, and per-suite schemas/databases. Successful cleanup verifies ownership
+before removing only disposable resources; failed runs retain diagnostic volumes.
+Tests require schema/database creation privileges on that disposable server.
+
+For a reproducible shuffle order, use `VERIFY_TEST_SEED=411 npm run verify`.
+Focused `npm test`/Vitest runs should explicitly select a disposable
+`TEST_DATABASE_URL`. The concurrency suite also needs CREATEDB.
+`npm run typecheck` and `npm run build` can be run separately.
+
+The full workspace gate passed twice on October 19, 2026, with seeds
+2113957158 and 411: **439 tests across 35 files**, API/PostgreSQL restarts,
+default Compose startup, and retained-data checks. These are local workspace
+results; a clean-checkout rehearsal of the final submitted revision remains
+a separate check. Controlled faults and graceful restarts do not simulate every
+hardware failure, network partition, or availability condition.
+
+## Performance
+
+```bash
+npm run perf:compare
+npm run perf:diagnose
+```
+
+These commands create isolated stacks and retain measured JSON evidence.
+The [performance report](docs/performance.md) contains reproduction settings,
+environment, raw links, lock diagnostics, correctness checks, and limitations.
+At concurrency 10 the saved comparison observed median ~293 accepted
+requests/sec for one busy account and ~1016 across ten accounts.
+
+For a small run against an explicitly configured local test API/database:
+`npm run perf -- --requests 20 --concurrency 2`. This workflow reads the
+private environment and retains its newly provisioned fixtures in that database.
+
+## Configuration and troubleshooting
+
+| Setting | Purpose |
+| --- | --- |
+| API_KEY_PEPPER | Private stable secret, at least 16 characters; shared by API/init/demo and host provisioning |
+| API_PORT | Published API port, default 3000; internal API stays api:3000 |
+| POSTGRES_PORT | Published DB port; .env.example selects 55432, Compose fallback is 5432 |
+| DATABASE_URL | Host DB connection; match the published DB port |
+| HOST / PORT / NODE_ENV | Host server options; defaults 0.0.0.0 / 3000 / development |
+| DEMO_SERVICE_URL / PERF_BASE_URL | Optional host demo/load API origin |
+
+Compose injects the internal `db:5432` URL. Exported shell variables override
+`.env`; keep host database/client addresses aligned with published ports.
+
+| Symptom | Check |
+| --- | --- |
+| Port occupied | Select unused API_PORT/POSTGRES_PORT and align DATABASE_URL/client origin |
+| Unexpected 401 | Use the issued account key, keep the original pepper, run npm run config:check |
+| Container settings changed | Recreate with docker compose up -d --no-deps --wait api; restart alone retains old environment |
+| init/demo exited 0 | Expected one-shot completion; api/db should remain healthy |
+| Health 503 | Inspect local database readiness/connectivity |
+
+For host development, `npm run dev` watches source; `npm run build && npm start`
+runs compiled code. Operator commands are `db:init`, `db:migrate`, `db:seed`,
+`db:check` (after a build), and `account:create -- --name "Example"`,
+all invoked through `npm run` against the explicitly configured database.
+Account creation defaults to Starter; `--plan Pro` selects Pro.
+
+## Scope and limitations
+
+The required scope covers the quota service, account isolation, plans, durable
+usage/history, live updates, safe retries, concurrency, client, tests, and
+performance evidence. Fastify, CLI provisioning, UTC processing months,
+first-blocker precedence, and historical-usage conventions are chosen decisions.
+
+Per-account serialization limits a hot account's throughput. One Node process,
+a ten-connection default pool, and shared local hardware also constrain scaling.
+History grows without retention. Billing, refunds, end-user login, multiple
+resources, RBAC, distributed infrastructure, and a browser UI are outside scope.
+Production TLS, secret management, key rotation/revocation, and deployment
+hardening are not implemented. The API does not atomically coordinate an
+external document processor. SIGINT/SIGTERM close the HTTP server and pool.
+
+## ChatGPT assistance
+
+All testing and performance-related work, including automated tests, verification
+scripts, benchmarking tools, and performance analysis/documentation, was developed
+with assistance from ChatGPT. Reported outcomes come from actual local runs;
+raw performance results are included in this repository.

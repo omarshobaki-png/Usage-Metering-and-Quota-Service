@@ -54,9 +54,6 @@ export async function readHistory(pool: Pool, accountId: string, query: HistoryQ
     if (owned.rows.length === 0) throw new AppError("User not found.", 404, "USER_NOT_FOUND");
   }
 
-  // Consumption only inserts decisions, after taking its account lock. Thus
-  // later committed decisions for this account have higher sequence values.
-  // The first page's upper bound excludes them from all continuation pages.
   const result = await pool.query<{ sequence: string; snapshot: unknown }>(
     `SELECT decision_sequence::text AS sequence, decision_snapshot AS snapshot
      FROM request_decisions

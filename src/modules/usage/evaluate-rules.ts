@@ -34,13 +34,6 @@ export type RuleEvaluation = RuleEvaluationBalances & (
     }
 );
 
-/**
- * Evaluate validated quantities: units is positive; usage and limits are
- * non-negative integers, all bounded by MAX_QUANTITY. Usage may exceed a
- * monthly limit after a downgrade. Callers validate input before evaluation.
- *
- * Results describe proposed balances only; this function performs no writes.
- */
 export function evaluateRules(input: EvaluateRulesInput): RuleEvaluation {
   const { units, account, user } = input;
   const accountRemaining = Math.max(0, account.monthlyLimit - account.consumed);

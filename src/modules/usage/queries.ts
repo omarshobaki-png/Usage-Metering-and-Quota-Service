@@ -61,10 +61,6 @@ async function readUsage(
     throw new InvalidRequestError("Query parameters are invalid.");
   }
 
-  // One statement snapshot includes ownership, current assignments, limits and
-  // both counters. Separate SELECTs could straddle a consume/plan-change commit.
-  // Production uses the same database clock as consumption; the override is
-  // internal and lets integration tests move across a UTC month boundary.
   const result = await pool.query<UsageRow>(
     `
       WITH current_period AS (

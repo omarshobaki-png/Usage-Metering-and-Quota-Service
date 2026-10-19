@@ -42,15 +42,6 @@ export interface ConsumeOptions {
   };
 }
 
-/**
- * One connection and one READ COMMITTED transaction:
- * 1. Lock the account in a standalone statement (the transaction helper).
- * 2. Read owned user, assignments, existing decision, and current plan rules.
- * 3. Capture processing time after the lock and derive one UTC month.
- * 4. Initialize/read buckets and evaluate all four rules.
- * 5. On acceptance, increment both totals; always record the valid decision.
- * 6. Commit before returning. Any exception rolls back and releases the client.
- */
 export async function consume(
   pool: Pool,
   accountId: string,
