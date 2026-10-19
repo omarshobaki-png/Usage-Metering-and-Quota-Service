@@ -1,0 +1,39 @@
+$ npm run demo:setup
+Created fresh dedicated demo account <redacted-account-id>.
+Created Demo Account, Demo Basic, and Demo Premium through the API.
+Registered one Basic user and one Premium user.
+Saved private client configuration to /home/omar/final_project/demo/.demo.env.
+The raw API key was not printed. Run npm run demo:run next.
+
+$ npm run demo:run
+Quota demo: five new decisions, one replay, then live usage
+1. Basic requests 4 units
+  ACCEPTED requestId=demo-basic-4
+  decision snapshot: account consumed=4 remaining=26; Basic consumed=4 remaining=6
+  simulated work: processed 4 document unit(s) for Basic
+2. Basic requests 6 units
+  REJECTED requestId=demo-basic-6
+  decision snapshot: account consumed=4 remaining=26; Basic consumed=4 remaining=6
+  blocked by: scope=user rule=max_units_per_request limit=5
+  simulated work: skipped because quota rejected the request
+3. Premium requests 20 units
+  ACCEPTED requestId=demo-premium-20
+  decision snapshot: account consumed=24 remaining=6; Premium consumed=20 remaining=10
+  simulated work: processed 20 document unit(s) for Premium
+4. Premium requests 7 units before the account upgrade
+  REJECTED requestId=demo-premium-7-before-upgrade
+  decision snapshot: account consumed=24 remaining=6; Premium consumed=20 remaining=10
+  blocked by: scope=account rule=monthly_limit limit=30
+  simulated work: skipped because quota rejected the request
+Plan change: updated Demo Account monthly limit from 30 to 50 through the API
+5. Premium requests 7 units with a NEW request ID
+  ACCEPTED requestId=demo-premium-7-after-upgrade
+  decision snapshot: account consumed=31 remaining=19; Premium consumed=27 remaining=3
+  simulated work: processed 7 document unit(s) for Premium
+Replay: earlier rejected request ID (no new work)
+  REJECTED requestId=demo-premium-7-before-upgrade
+  decision snapshot: account consumed=24 remaining=6; Premium consumed=20 remaining=10
+  blocked by: scope=account rule=monthly_limit limit=30
+Live usage after replay (current counters, not the saved snapshot)
+  month=2026-10; account consumed=31 remaining=19; Premium consumed=27 remaining=3
+Demo completed successfully. The API key was not printed.

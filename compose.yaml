@@ -55,5 +55,22 @@ services:
       API_KEY_PEPPER: ${API_KEY_PEPPER:?Set API_KEY_PEPPER in .env before starting Docker}
     command: ["node", "dist/src/db/initialize.js"]
 
+  # Local-only bootstrap and client. Each execution creates its own account;
+  # the raw API key stays in this process's memory and is never written to disk.
+  demo:
+    build:
+      context: .
+      target: runtime
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://usage_metering:usage_metering_dev@db:5432/usage_metering
+      API_KEY_PEPPER: ${API_KEY_PEPPER:?Set API_KEY_PEPPER in .env before starting Docker}
+      DEMO_SERVICE_URL: http://api:3000
+    command: ["node", "dist/demo/compose.js"]
+    restart: "no"
+
 volumes:
   postgres_data:
