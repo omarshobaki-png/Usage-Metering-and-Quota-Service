@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-18T12:43:11.818Z",
+  "source": {
+    "commit": "36cd2520936fa9b2dc8a25fbd09c2e23541a1bef",
+    "dirty": true
+  },
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "osRelease": "6.18.33.2-microsoft-standard-WSL2",
+    "logicalCpus": 16,
+    "cpuModel": "13th Gen Intel(R) Core(TM) i7-13620H",
+    "memoryBytes": 8130293760
+  },
+  "versions": {
+    "runner": "1.0.0",
+    "node": "v22.22.1",
+    "undici": null,
+    "application": "0.1.0",
+    "postgres": "17.6 (Debian 17.6-2.pgdg12+1)"
+  },
+  "docker": {
+    "version": "29.8.2",
+    "operatingSystem": "Docker Desktop",
+    "cpus": 16,
+    "memoryBytes": 8130293760
+  },
+  "composeVersion": "5.5.1",
+  "apiRuntime": {
+    "node": "v22.22.1",
+    "poolMax": 10,
+    "applicationName": "",
+    "processCount": 1
+  },
+  "postgres": "PostgreSQL 17.6 (Debian 17.6-2.pgdg12+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+  "containers": [
+    {
+      "service": "api",
+      "image": "quota-diagnose-d1a7ff9d-e48b-4687-88c2-1db7cbc4a114-api",
+      "imageId": "sha256:1c7fe2429017c621e94899166c31905714f60be01ca81b148e5e6a811d25089b",
+      "nanoCpus": 0,
+      "memoryLimitBytes": 0
+    },
+    {
+      "service": "db",
+      "image": "postgres:17.6-bookworm",
+      "imageId": "sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+      "nanoCpus": 0,
+      "memoryLimitBytes": 0
+    }
+  ],
+  "observer": {
+    "apiClientAddress": "172.20.0.3",
+    "apiApplicationName": "",
+    "minimumIntervalMs": 25,
+    "extraConnections": 1,
+    "method": "Read-only aggregate pg_stat_activity and pg_blocking_pids; no query text or PIDs persisted."
+  },
+  "settings": {
+    "concurrency": 10,
+    "requests": 2000,
+    "monthlyLimit": 4000,
+    "totalUsers": 20,
+    "repetitions": 3
+  },
+  "warmup": {
+    "requestsPerShape": 500,
+    "separateFixtures": true,
+    "sampled": false
+  },
+  "clientAndServerShareMachine": true,
+  "developmentStackAlsoRunning": true,
+  "limitations": [
+    "Sampling perturbs the system; results are diagnostic, not replacement capacity figures.",
+    "Samples are backend observations, not request wait durations or independent requests. Short waits can be missed.",
+    "One query at a time; effective interval includes query duration and scheduling, not exactly 25 ms.",
+    "Pool queue time, CPU and IO utilization are not measured."
+  ]
+}

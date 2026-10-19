@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "startedAt": "2026-10-18T12:43:11.818Z",
+  "finishedAt": "2026-10-18T12:43:56.118Z",
+  "measuredRuns": 6,
+  "acceptedMeasuredUnits": 12000,
+  "summaries": [
+    {
+      "shape": "hot",
+      "repetition": 1,
+      "rawRun": "hot-c10-r1.json",
+      "locks": "hot-c10-r1-locks.json",
+      "requestsPerSecond": 298.5787565644717,
+      "p95Ms": 41.84983300000022,
+      "sampleCount": 256,
+      "samplesWithAccountLockWait": 255,
+      "fractionWithAccountLockWait": 0.99609375,
+      "meanBackends": 10,
+      "meanActive": 8.97265625,
+      "meanLockWaiting": 8.43359375,
+      "meanAccountLockWaiting": 8.43359375,
+      "peakAccountLockWaiting": 9,
+      "lockEventObservations": {
+        "transactionid": 251,
+        "tuple": 1908
+      }
+    },
+    {
+      "shape": "many",
+      "repetition": 1,
+      "rawRun": "many-c10-r1.json",
+      "locks": "many-c10-r1-locks.json",
+      "requestsPerSecond": 1148.834295962746,
+      "p95Ms": 11.713736999998218,
+      "sampleCount": 66,
+      "samplesWithAccountLockWait": 2,
+      "fractionWithAccountLockWait": 0.030303030303030304,
+      "meanBackends": 10,
+      "meanActive": 2.227272727272727,
+      "meanLockWaiting": 0.030303030303030304,
+      "meanAccountLockWaiting": 0.030303030303030304,
+      "peakAccountLockWaiting": 1,
+      "lockEventObservations": {
+        "transactionid": 2
+      }
+    },
+    {
+      "shape": "many",
+      "repetition": 2,
+      "rawRun": "many-c10-r2.json",
+      "locks": "many-c10-r2-locks.json",
+      "requestsPerSecond": 1215.8067549278612,
+      "p95Ms": 10.47903800000131,
+      "sampleCount": 63,
+      "samplesWithAccountLockWait": 0,
+      "fractionWithAccountLockWait": 0,
+      "meanBackends": 10,
+      "meanActive": 2.0952380952380953,
+      "meanLockWaiting": 0,
+      "meanAccountLockWaiting": 0,
+      "peakAccountLockWaiting": 0,
+      "lockEventObservations": {}
+    },
+    {
+      "shape": "hot",
+      "repetition": 2,
+      "rawRun": "hot-c10-r2.json",
+      "locks": "hot-c10-r2-locks.json",
+      "requestsPerSecond": 318.14832027287014,
+      "p95Ms": 38.43116799999552,
+      "sampleCount": 241,
+      "samplesWithAccountLockWait": 240,
+      "fractionWithAccountLockWait": 0.995850622406639,
+      "meanBackends": 10,
+      "meanActive": 9.12863070539419,
+      "meanLockWaiting": 8.485477178423237,
+      "meanAccountLockWaiting": 8.485477178423237,
+      "peakAccountLockWaiting": 9,
+      "lockEventObservations": {
+        "transactionid": 237,
+        "tuple": 1808
+      }
+    },
+    {
+      "shape": "hot",
+      "repetition": 3,
+      "rawRun": "hot-c10-r3.json",
+      "locks": "hot-c10-r3-locks.json",
+      "requestsPerSecond": 326.1355980864146,
+      "p95Ms": 35.694674999998824,
+      "sampleCount": 235,
+      "samplesWithAccountLockWait": 234,
+      "fractionWithAccountLockWait": 0.9957446808510638,
+      "meanBackends": 10,
+      "meanActive": 8.97872340425532,
+      "meanLockWaiting": 8.51063829787234,
+      "meanAccountLockWaiting": 8.51063829787234,
+      "peakAccountLockWaiting": 9,
+      "lockEventObservations": {
+        "transactionid": 230,
+        "tuple": 1770
+      }
+    },
+    {
+      "shape": "many",
+      "repetition": 3,
+      "rawRun": "many-c10-r3.json",
+      "locks": "many-c10-r3-locks.json",
+      "requestsPerSecond": 1195.4583378151815,
+      "p95Ms": 10.60507399999915,
+      "sampleCount": 64,
+      "samplesWithAccountLockWait": 2,
+      "fractionWithAccountLockWait": 0.03125,
+      "meanBackends": 10,
+      "meanActive": 2.53125,
+      "meanLockWaiting": 0.03125,
+      "meanAccountLockWaiting": 0.03125,
+      "peakAccountLockWaiting": 1,
+      "lockEventObservations": {
+        "transactionid": 2
+      }
+    }
+  ],
+  "interpretation": "Unweighted sample means of concurrent API backends; not milliseconds, request counts or a decomposition of HTTP latency."
+}

@@ -1,0 +1,1092 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "runId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "workload": {
+              "type": "string",
+              "enum": [
+                "throughput",
+                "correctness"
+              ]
+            },
+            "baseUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "accounts": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "usersPerAccount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "concurrency": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requests": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "units": {
+              "type": "number",
+              "const": 1
+            },
+            "accountMonthlyLimit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "userMonthlyLimit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestLimit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "distribution": {
+              "type": "string",
+              "const": "round-robin accounts and users"
+            },
+            "workloadModel": {
+              "type": "string",
+              "const": "closed-loop bounded workers"
+            }
+          },
+          "required": [
+            "workload",
+            "baseUrl",
+            "accounts",
+            "usersPerAccount",
+            "concurrency",
+            "requests",
+            "timeoutMs",
+            "units",
+            "accountMonthlyLimit",
+            "userMonthlyLimit",
+            "requestLimit",
+            "distribution",
+            "workloadModel"
+          ],
+          "additionalProperties": false
+        },
+        "versions": {
+          "type": "object",
+          "properties": {
+            "runner": {
+              "type": "string",
+              "const": "1.0.0"
+            },
+            "node": {
+              "type": "string"
+            },
+            "undici": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "application": {
+              "type": "string"
+            },
+            "postgres": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "runner",
+            "node",
+            "undici",
+            "application",
+            "postgres"
+          ],
+          "additionalProperties": false
+        },
+        "machine": {
+          "type": "object",
+          "properties": {
+            "platform": {
+              "type": "string"
+            },
+            "arch": {
+              "type": "string"
+            },
+            "osRelease": {
+              "type": "string"
+            },
+            "logicalCpus": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "cpuModel": {
+              "type": "string"
+            },
+            "memoryBytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "platform",
+            "arch",
+            "osRelease",
+            "logicalCpus",
+            "cpuModel",
+            "memoryBytes"
+          ],
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "dirty": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "commit",
+            "dirty"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "type": "string",
+          "const": "passed"
+        },
+        "measurements": {
+          "type": "object",
+          "properties": {
+            "attempted": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "completed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "maxInFlight": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "elapsedMs": {
+              "type": "number",
+              "minimum": 0
+            },
+            "completedPerSecond": {
+              "type": "number",
+              "minimum": 0
+            },
+            "acceptedPerSecond": {
+              "type": "number",
+              "minimum": 0
+            },
+            "latencyMs": {
+              "type": "object",
+              "properties": {
+                "sampleCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "p50": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "p95": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "p99": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "sampleCount",
+                "p50",
+                "p95",
+                "p99"
+              ],
+              "additionalProperties": false
+            },
+            "counts": {
+              "type": "object",
+              "properties": {
+                "accepted": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "quotaRejected": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "unexpectedHttpStatus": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "timeout": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "networkError": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "invalidResponse": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "accepted",
+                "quotaRejected",
+                "unexpectedHttpStatus",
+                "timeout",
+                "networkError",
+                "invalidResponse"
+              ],
+              "additionalProperties": false
+            },
+            "httpStatuses": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "retries": {
+              "type": "number",
+              "const": 0
+            },
+            "latencyScope": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "attempted",
+            "completed",
+            "maxInFlight",
+            "elapsedMs",
+            "completedPerSecond",
+            "acceptedPerSecond",
+            "latencyMs",
+            "counts",
+            "httpStatuses",
+            "retries",
+            "latencyScope"
+          ],
+          "additionalProperties": false
+        },
+        "verification": {
+          "type": "object",
+          "properties": {
+            "passed": {
+              "type": "boolean",
+              "const": true
+            },
+            "errors": {
+              "minItems": 0,
+              "maxItems": 0,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "accountConsumed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "sumUserConsumed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "uniqueAcceptedDecisionUnits": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "acceptedDecisions": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "rejectedDecisions": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "accounts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "accountId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "months": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[0-9]{4}-[0-9]{2}$"
+                    }
+                  },
+                  "monthlyLimit": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "accountConsumed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "sumUserConsumed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "uniqueAcceptedDecisionUnits": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "decisionCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "uniqueDecisionCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "users": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "consumed": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "monthlyLimit": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "acceptedDecisionUnits": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "userId",
+                        "consumed",
+                        "monthlyLimit",
+                        "acceptedDecisionUnits"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "accountId",
+                  "months",
+                  "monthlyLimit",
+                  "accountConsumed",
+                  "sumUserConsumed",
+                  "uniqueAcceptedDecisionUnits",
+                  "decisionCount",
+                  "uniqueDecisionCount",
+                  "users"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "passed",
+            "errors",
+            "accountConsumed",
+            "sumUserConsumed",
+            "uniqueAcceptedDecisionUnits",
+            "acceptedDecisions",
+            "rejectedDecisions",
+            "accounts"
+          ],
+          "additionalProperties": false
+        },
+        "failure": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "runId",
+        "startedAt",
+        "finishedAt",
+        "settings",
+        "versions",
+        "machine",
+        "source",
+        "status",
+        "measurements",
+        "verification",
+        "failure"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "runId": {
+          "type": "string",
+          "format": "uuid",
+          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "workload": {
+              "type": "string",
+              "enum": [
+                "throughput",
+                "correctness"
+              ]
+            },
+            "baseUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "accounts": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "usersPerAccount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "concurrency": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requests": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "timeoutMs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "units": {
+              "type": "number",
+              "const": 1
+            },
+            "accountMonthlyLimit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "userMonthlyLimit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "requestLimit": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "distribution": {
+              "type": "string",
+              "const": "round-robin accounts and users"
+            },
+            "workloadModel": {
+              "type": "string",
+              "const": "closed-loop bounded workers"
+            }
+          },
+          "required": [
+            "workload",
+            "baseUrl",
+            "accounts",
+            "usersPerAccount",
+            "concurrency",
+            "requests",
+            "timeoutMs",
+            "units",
+            "accountMonthlyLimit",
+            "userMonthlyLimit",
+            "requestLimit",
+            "distribution",
+            "workloadModel"
+          ],
+          "additionalProperties": false
+        },
+        "versions": {
+          "type": "object",
+          "properties": {
+            "runner": {
+              "type": "string",
+              "const": "1.0.0"
+            },
+            "node": {
+              "type": "string"
+            },
+            "undici": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "application": {
+              "type": "string"
+            },
+            "postgres": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "runner",
+            "node",
+            "undici",
+            "application",
+            "postgres"
+          ],
+          "additionalProperties": false
+        },
+        "machine": {
+          "type": "object",
+          "properties": {
+            "platform": {
+              "type": "string"
+            },
+            "arch": {
+              "type": "string"
+            },
+            "osRelease": {
+              "type": "string"
+            },
+            "logicalCpus": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "cpuModel": {
+              "type": "string"
+            },
+            "memoryBytes": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "platform",
+            "arch",
+            "osRelease",
+            "logicalCpus",
+            "cpuModel",
+            "memoryBytes"
+          ],
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "dirty": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "commit",
+            "dirty"
+          ],
+          "additionalProperties": false
+        },
+        "status": {
+          "type": "string",
+          "const": "failed"
+        },
+        "measurements": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "attempted": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "completed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "maxInFlight": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "elapsedMs": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "completedPerSecond": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "acceptedPerSecond": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "latencyMs": {
+                  "type": "object",
+                  "properties": {
+                    "sampleCount": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "p50": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "p95": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "p99": {
+                      "anyOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "sampleCount",
+                    "p50",
+                    "p95",
+                    "p99"
+                  ],
+                  "additionalProperties": false
+                },
+                "counts": {
+                  "type": "object",
+                  "properties": {
+                    "accepted": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "quotaRejected": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "unexpectedHttpStatus": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "timeout": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "networkError": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "invalidResponse": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "accepted",
+                    "quotaRejected",
+                    "unexpectedHttpStatus",
+                    "timeout",
+                    "networkError",
+                    "invalidResponse"
+                  ],
+                  "additionalProperties": false
+                },
+                "httpStatuses": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "retries": {
+                  "type": "number",
+                  "const": 0
+                },
+                "latencyScope": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "attempted",
+                "completed",
+                "maxInFlight",
+                "elapsedMs",
+                "completedPerSecond",
+                "acceptedPerSecond",
+                "latencyMs",
+                "counts",
+                "httpStatuses",
+                "retries",
+                "latencyScope"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verification": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "passed": {
+                  "type": "boolean"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "accountConsumed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "sumUserConsumed": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "uniqueAcceptedDecisionUnits": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "acceptedDecisions": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "rejectedDecisions": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "accounts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "accountId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                      },
+                      "months": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[0-9]{4}-[0-9]{2}$"
+                        }
+                      },
+                      "monthlyLimit": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "accountConsumed": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "sumUserConsumed": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "uniqueAcceptedDecisionUnits": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "decisionCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "uniqueDecisionCount": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "users": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "userId": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "consumed": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "monthlyLimit": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "acceptedDecisionUnits": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "userId",
+                            "consumed",
+                            "monthlyLimit",
+                            "acceptedDecisionUnits"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "accountId",
+                      "months",
+                      "monthlyLimit",
+                      "accountConsumed",
+                      "sumUserConsumed",
+                      "uniqueAcceptedDecisionUnits",
+                      "decisionCount",
+                      "uniqueDecisionCount",
+                      "users"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "passed",
+                "errors",
+                "accountConsumed",
+                "sumUserConsumed",
+                "uniqueAcceptedDecisionUnits",
+                "acceptedDecisions",
+                "rejectedDecisions",
+                "accounts"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "failure": {
+          "type": "object",
+          "properties": {
+            "stage": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "stage",
+            "message"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "runId",
+        "startedAt",
+        "finishedAt",
+        "settings",
+        "versions",
+        "machine",
+        "source",
+        "status",
+        "measurements",
+        "verification",
+        "failure"
+      ],
+      "additionalProperties": false
+    }
+  ],
+  "$id": "urn:usage-metering:load-result:v1"
+}

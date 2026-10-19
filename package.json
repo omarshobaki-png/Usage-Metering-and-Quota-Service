@@ -12,10 +12,19 @@
     "db:migrate": "node --env-file-if-exists=.env --import tsx src/db/migrate.ts",
     "db:seed": "node --env-file-if-exists=.env --import tsx src/db/seed.ts",
     "db:init": "node --env-file-if-exists=.env --import tsx src/db/initialize.ts",
+    "config:check": "node --env-file-if-exists=.env --import tsx scripts/check-config.ts",
     "account:create": "node --env-file-if-exists=.env --import tsx scripts/create-account.ts",
+    "demo:setup": "node --env-file-if-exists=.env --import tsx demo/setup.ts",
+    "demo:run": "node --env-file-if-exists=demo/.demo.env --import tsx demo/client.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs run --passWithNoTests",
-    "test:watch": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs"
+    "test:watch": "node --env-file-if-exists=.env ./node_modules/vitest/vitest.mjs",
+    "test:reliability": "node --import tsx scripts/verify-reliability.ts",
+    "test:compose": "node --import tsx scripts/verify-compose-demo.ts",
+    "verify": "node --import tsx scripts/verify.ts",
+    "perf": "node --env-file-if-exists=.env --import tsx performance/run.ts",
+    "perf:compare": "node --import tsx performance/compare.ts",
+    "perf:diagnose": "node --import tsx performance/diagnose.ts"
   },
   "engines": {
     "node": ">=22 <23"

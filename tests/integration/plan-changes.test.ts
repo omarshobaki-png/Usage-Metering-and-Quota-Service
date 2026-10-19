@@ -31,7 +31,7 @@ const poolConfig = {
 const adminPool = new Pool({ connectionString: databaseUrl, max: 1 });
 const testPool = new Pool(poolConfig);
 const mutationPool = new Pool({ ...poolConfig, application_name: mutationName });
-const consumptionPool = new Pool({ ...poolConfig, application_name: consumptionName });
+const consumptionPool = new Pool({ ...poolConfig, max: 12, application_name: consumptionName });
 const advisoryNamespace = 23;
 const advisoryKey = parseInt(testId.slice(0, 7), 16);
 const testPepper = "live-plan-test-pepper";
@@ -147,20 +147,59 @@ async function expectReconciled(total: number, decisionCount: number) {
   expect(perUser.rows).toEqual([]);
 }
 
-async function waitForLock(applicationName: string, blockerPid?: number) {
+async function waitForLock(applicationName: string, blockerPid?: number, expected = 1) {
   const deadline = Date.now() + 5_000;
   while (Date.now() < deadline) {
-    const result = await testPool.query<{ waiting: boolean }>(
-      `SELECT EXISTS (SELECT 1 FROM pg_stat_activity
+    const result = await testPool.query<{ waiting: number }>(
+      `SELECT COUNT(DISTINCT pid)::integer AS waiting FROM pg_stat_activity
        WHERE application_name = $1 AND wait_event_type = 'Lock'
          AND cardinality(pg_blocking_pids(pid)) > 0
-         AND ($2::integer IS NULL OR $2 = ANY(pg_blocking_pids(pid)))) AS waiting`,
+         AND ($2::integer IS NULL OR $2 = ANY(pg_blocking_pids(pid)))`,
       [applicationName, blockerPid ?? null]
     );
-    if (result.rows[0]!.waiting) return;
+    if (result.rows[0]!.waiting >= expected) return;
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
-  throw new Error(`No observed lock wait for ${applicationName}.`);
+  throw new Error(`Did not observe ${expected} lock wait(s) for ${applicationName}.`);
+}
+
+function unwrapResponses(results: PromiseSettledResult<LightMyRequestResponse>[]) {
+  return results.map((result) => {
+    if (result.status === "rejected") throw result.reason;
+    return result.value;
+  });
+}
+
+async function updateBeforeBurst(
+  app: FastifyInstance, planId: number, monthlyLimit: number,
+  start: () => PromiseLike<LightMyRequestResponse>[]
+) {
+  await app.ready();
+  await installMutationGate("plans", planId);
+  const holder = await testPool.connect();
+  let work: Promise<PromiseSettledResult<LightMyRequestResponse>[]> = Promise.resolve([]);
+  let results: PromiseSettledResult<LightMyRequestResponse>[] = [];
+  try {
+    await holder.query("SELECT pg_advisory_lock($1,$2)", [advisoryNamespace, advisoryKey]);
+    const pid = (await holder.query<{ pid: number }>("SELECT pg_backend_pid() AS pid")).rows[0]!.pid;
+    const update = patch(app, `/plans/${planId}`, { monthlyLimit });
+    work = Promise.allSettled([update]);
+    await waitForLock(mutationName, pid);
+    const contenders = start();
+    work = Promise.allSettled([update, ...contenders]);
+    await waitForLock(consumptionName, undefined, contenders.length);
+  } finally {
+    try {
+      await holder.query("SELECT pg_advisory_unlock($1,$2)", [advisoryNamespace, advisoryKey]);
+    } finally {
+      holder.release();
+      results = await work; // Drain even when an assertion/lock observation fails.
+    }
+  }
+  const [update, ...responses] = unwrapResponses(results);
+  expect(update!.statusCode).toBe(200);
+  expect(update!.json().plan).toMatchObject({ id: planId, monthlyLimit, revision: 2 });
+  return responses;
 }
 
 // Pause an actual HTTP mutation after its account lock, without adding a
@@ -453,5 +492,203 @@ describe("live plan changes with PostgreSQL", () => {
       [scope]: { consumed: 0, remaining: 5, plan: { id: replacement.id, revision: 1 } }
     });
     await expectReconciled(0, 1);
+  }, 20_000);
+});
+
+describe("controlled plan updates, bursts and recovery", () => {
+  it("accepts the last 2 units before a downgrade: usage 8 -> 10, then remaining clamps to zero", async () => {
+    const plan = await configurePlan("account", 10);
+    await configurePlan("user", 100);
+    const setup = createTestApp();
+    expect((await postConsume(setup, 8, "seed-eight")).json().accepted).toBe(true);
+    const entered = gate();
+    const release = gate();
+    const app = createTestApp({ testHooks: { afterDecisionInsert: async () => {
+      entered.release();
+      await release.promise;
+    } } });
+    await app.ready();
+    const request = postConsume(app, 2, "last-two-before-update");
+    let work: Promise<PromiseSettledResult<LightMyRequestResponse>[]> = Promise.allSettled([request]);
+    let results: PromiseSettledResult<LightMyRequestResponse>[] = [];
+    try {
+      await bounded(entered.promise, "last two units' pre-commit gate");
+      const update = patch(app, `/plans/${plan.id}`, { monthlyLimit: 5 });
+      work = Promise.allSettled([request, update]);
+      await waitForLock(mutationName);
+      // The uncommitted 10-unit total is invisible to a separate connection.
+      await expectReconciled(8, 1);
+    } finally {
+      release.release();
+      results = await work;
+    }
+    const [response, update] = unwrapResponses(results);
+    expect(response!.statusCode).toBe(200);
+    expect(response!.json()).toMatchObject({ accepted: true,
+      account: { consumed: 10, remaining: 0, plan: { id: plan.id, revision: 1 } } });
+    expect(update!.statusCode).toBe(200);
+    expect(update!.json().plan).toMatchObject({ monthlyLimit: 5, revision: 2 });
+    const row = await savedDecision("last-two-before-update");
+    expect(row.decision_snapshot.evaluatedLimits.account.monthlyLimit).toBe(10);
+    const after = await postConsume(app, 1, "new-after-downgrade");
+    expect(after.statusCode).toBe(200);
+    expect(after.json()).toMatchObject({ accepted: false,
+      blockedBy: { scope: "account", rule: "monthly_limit", limit: 5 },
+      account: { consumed: 10, remaining: 0, plan: { id: plan.id, revision: 2 } } });
+    expect((await postConsume(app, 2, "last-two-before-update")).json()).toEqual(response!.json());
+    expect(await savedDecision("last-two-before-update")).toEqual(row);
+    await expectReconciled(10, 3);
+  }, 20_000);
+
+  it("rejects the last 2 units after a downgrade wins: usage stays 8 under revision 2", async () => {
+    const plan = await configurePlan("account", 10);
+    await configurePlan("user", 100);
+    const app = createTestApp();
+    expect((await postConsume(app, 8, "seed-eight")).json().accepted).toBe(true);
+    const original = await savedDecision("seed-eight");
+    const [response] = await updateBeforeBurst(app, plan.id, 5,
+      () => [postConsume(app, 2, "last-two-after-update")]);
+    expect(response!.statusCode).toBe(200);
+    expect(response!.json()).toMatchObject({ accepted: false,
+      blockedBy: { scope: "account", rule: "monthly_limit", limit: 5 },
+      account: { consumed: 8, remaining: 0, plan: { id: plan.id, revision: 2 } } });
+    const row = await savedDecision("last-two-after-update");
+    expect(row.decision_snapshot.evaluatedLimits.account.monthlyLimit).toBe(5);
+    const after = await postConsume(app, 1, "new-after-downgrade");
+    expect(after.statusCode).toBe(200);
+    expect(after.json()).toMatchObject({ accepted: false, account: { consumed: 8, remaining: 0, plan: { revision: 2 } } });
+    expect(await savedDecision("seed-eight")).toEqual(original);
+    await expectReconciled(8, 3);
+  }, 20_000);
+
+  it.each(["account", "user"] as const)(
+    "applies a committed %s allowance increase to six queued actions across two users without rewriting old rejections",
+    async (scope) => {
+      const accountPlan = await configurePlan("account", scope === "account" ? 10 : 100);
+      const userPlan = await configurePlan("user", scope === "user" ? 5 : 100);
+      const plan = scope === "account" ? accountPlan : userPlan;
+      const users = [fixture.userA.id, (await createUser(testPool, fixture.accountA.id, { planId: userPlan.id })).id];
+      const app = createTestApp();
+      for (const [index, userId] of users.entries()) {
+        const response = await postConsume(app, 4, `seed-${index}`, userId);
+        expect(response.statusCode).toBe(200);
+        expect(response.json().accepted).toBe(true);
+      }
+      const oldUnits = scope === "account" ? 3 : 2;
+      const oldRows = [];
+      for (const [index, userId] of users.entries()) {
+        const response = await postConsume(app, oldUnits, `old-rejected-${index}`, userId);
+        expect(response.statusCode).toBe(200);
+        expect(response.json()).toMatchObject({ accepted: false, blockedBy: { scope, rule: "monthly_limit" },
+          [scope]: { plan: { id: plan.id, revision: 1 } } });
+        oldRows.push(await savedDecision(`old-rejected-${index}`));
+      }
+      const newLimit = scope === "account" ? 20 : 10;
+      const responses = await updateBeforeBurst(app, plan.id, newLimit, () =>
+        Array.from({ length: 6 }, (_, index) => postConsume(app, 2, `queued-${index}`, users[index % 2]!)));
+      expect(responses).toHaveLength(6);
+      for (const [index, response] of responses.entries()) {
+        expect(response.statusCode).toBe(200);
+        expect(response.json()).toMatchObject({ accepted: true,
+          [scope]: { plan: { id: plan.id, revision: 2 } } });
+        const row = await savedDecision(`queued-${index}`);
+        expect(row.decision_snapshot.response).toEqual(response.json());
+        expect(row.decision_snapshot.evaluatedLimits[scope].monthlyLimit).toBe(newLimit);
+      }
+      const totals = await testPool.query(
+        "SELECT consumed_units FROM user_monthly_usage WHERE account_id = $1 ORDER BY user_id", [fixture.accountA.id]);
+      expect(totals.rows).toEqual([{ consumed_units: 10 }, { consumed_units: 10 }]);
+      for (const [index, userId] of users.entries()) {
+        // This request starts only after the successful PATCH response has been observed.
+        const after = await postConsume(app, 1, `after-response-${index}`, userId);
+        expect(after.statusCode).toBe(200);
+        expect(after.json()).toMatchObject({ accepted: false,
+          blockedBy: { scope, rule: "monthly_limit", limit: newLimit },
+          [scope]: { remaining: 0, plan: { id: plan.id, revision: 2 } } });
+        const replay = await postConsume(app, oldUnits, `old-rejected-${index}`, userId);
+        expect(replay.statusCode).toBe(200);
+        expect(replay.json()).toEqual(oldRows[index]!.decision_snapshot.response);
+        expect(await savedDecision(`old-rejected-${index}`)).toEqual(oldRows[index]);
+      }
+      await expectReconciled(20, 12);
+    }, 20_000);
+
+  it.each([1, 20])(
+    "preserves one accepted charge during a retry burst racing an account limit change to %i",
+    async (monthlyLimit) => {
+      const plan = await configurePlan("account", 10);
+      const userPlan = await configurePlan("user", 100);
+      const other = await createUser(testPool, fixture.accountA.id, { planId: userPlan.id });
+      const app = createTestApp();
+      const original = await postConsume(app, 3, "accepted-once");
+      expect(original.statusCode).toBe(200);
+      expect(original.json().accepted).toBe(true);
+      const row = await savedDecision("accepted-once");
+      const before = await readAccounting();
+      const responses = await updateBeforeBurst(app, plan.id, monthlyLimit, () => [
+        ...Array.from({ length: 8 }, () => postConsume(app, 3, "accepted-once")),
+        postConsume(app, 4, "accepted-once"),
+        postConsume(app, 3, "accepted-once", other.id)
+      ]);
+      for (const replay of responses.slice(0, 8)) {
+        expect(replay.statusCode).toBe(200);
+        expect(replay.json()).toEqual(original.json());
+      }
+      for (const conflict of responses.slice(8)) {
+        expect(conflict.statusCode).toBe(409);
+        expect(conflict.json().error.code).toBe("REQUEST_ID_CONFLICT");
+      }
+      expect(await readAccounting()).toEqual(before); // No new decision, counter or history mutation.
+      expect(await savedDecision("accepted-once")).toEqual(row);
+      await expectReconciled(3, 1);
+      const after = await postConsume(app, 1, "fresh-after-conflicts", other.id);
+      expect(after.statusCode).toBe(200); // Conflict transactions released their locks.
+      expect(after.json()).toMatchObject({ accepted: monthlyLimit === 20,
+        account: { consumed: monthlyLimit === 20 ? 4 : 3, remaining: monthlyLimit === 20 ? 16 : 0,
+          plan: { id: plan.id, revision: 2 } } });
+      expect(await savedDecision("accepted-once")).toEqual(row);
+      await expectReconciled(monthlyLimit === 20 ? 4 : 3, 2);
+    }, 20_000);
+
+  it("rolls back a partial increment and releases the lock to a waiting downgrade and same-ID retry", async () => {
+    const plan = await configurePlan("account", 10);
+    await configurePlan("user", 100);
+    const setup = createTestApp();
+    expect((await postConsume(setup, 8, "seed-eight")).json().accepted).toBe(true);
+    const before = await readAccounting();
+    const entered = gate();
+    const release = gate();
+    const app = createTestApp({ testHooks: { afterAccountIncrement: async () => {
+      entered.release();
+      await release.promise;
+      throw new Error("Test-only failure after account increment.");
+    } } });
+    await app.ready();
+    const request = postConsume(app, 2, "rolled-back-id");
+    let work: Promise<PromiseSettledResult<LightMyRequestResponse>[]> = Promise.allSettled([request]);
+    let results: PromiseSettledResult<LightMyRequestResponse>[] = [];
+    try {
+      await bounded(entered.promise, "partial increment before injected failure");
+      const update = patch(app, `/plans/${plan.id}`, { monthlyLimit: 5 });
+      work = Promise.allSettled([request, update]);
+      await waitForLock(mutationName);
+      expect(await readAccounting()).toEqual(before);
+    } finally {
+      release.release();
+      results = await work;
+    }
+    const [failed, update] = unwrapResponses(results);
+    expect(failed!.statusCode).toBe(500);
+    expect(update!.statusCode).toBe(200);
+    expect(update!.json().plan.revision).toBe(2);
+    expect(await readAccounting()).toEqual(before);
+    const retry = await postConsume(app, 2, "rolled-back-id");
+    expect(retry.statusCode).toBe(200); // Rejection does not enter the increment/fault hook.
+    expect(retry.json()).toMatchObject({ accepted: false,
+      blockedBy: { scope: "account", rule: "monthly_limit", limit: 5 },
+      account: { consumed: 8, remaining: 0, plan: { id: plan.id, revision: 2 } } });
+    const saved = await savedDecision("rolled-back-id");
+    expect(saved.decision_snapshot.response).toEqual(retry.json());
+    await expectReconciled(8, 2);
   }, 20_000);
 });

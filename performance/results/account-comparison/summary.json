@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-18T10:40:42.951Z",
+  "finishedAt": "2026-10-18T10:43:02.419Z",
+  "status": "passed",
+  "measuredRuns": 18,
+  "warmupRuns": 2,
+  "acceptedMeasuredUnits": 36000,
+  "aggregation": "Median of three run-level metrics; min/max are run-level spreads, not pooled percentiles.",
+  "summary": [
+    {
+      "shape": "hot",
+      "concurrency": 1,
+      "repetitions": 3,
+      "files": [
+        "hot-c1-r1.json",
+        "hot-c1-r2.json",
+        "hot-c1-r3.json"
+      ],
+      "requestsPerSecond": {
+        "median": 228.0657946367802,
+        "min": 208.32857517377903,
+        "max": 234.73360054098168
+      },
+      "elapsedMs": {
+        "median": 8769.399213,
+        "min": 8520.297032,
+        "max": 9600.219261
+      },
+      "p50Ms": {
+        "median": 4.108161999999993,
+        "min": 4.066729000000123,
+        "max": 4.466991000000235
+      },
+      "p95Ms": {
+        "median": 5.894053999999869,
+        "min": 5.467012999999497,
+        "max": 6.7276370000004135
+      },
+      "p99Ms": {
+        "median": 8.234974999999963,
+        "min": 6.881901000000653,
+        "max": 15.971072999999706
+      }
+    },
+    {
+      "shape": "hot",
+      "concurrency": 10,
+      "repetitions": 3,
+      "files": [
+        "hot-c10-r1.json",
+        "hot-c10-r2.json",
+        "hot-c10-r3.json"
+      ],
+      "requestsPerSecond": {
+        "median": 292.6468713214512,
+        "min": 272.4183662116978,
+        "max": 297.7648800073027
+      },
+      "elapsedMs": {
+        "median": 6834.175233,
+        "min": 6716.708834,
+        "max": 7341.648905
+      },
+      "p50Ms": {
+        "median": 32.574182000000064,
+        "min": 32.29441900000029,
+        "max": 35.073898000000554
+      },
+      "p95Ms": {
+        "median": 42.91859199999999,
+        "min": 40.50552299999981,
+        "max": 48.323745000000145
+      },
+      "p99Ms": {
+        "median": 50.59195999999997,
+        "min": 46.55535000000009,
+        "max": 54.6796989999998
+      }
+    },
+    {
+      "shape": "hot",
+      "concurrency": 50,
+      "repetitions": 3,
+      "files": [
+        "hot-c50-r1.json",
+        "hot-c50-r2.json",
+        "hot-c50-r3.json"
+      ],
+      "requestsPerSecond": {
+        "median": 263.25793687491966,
+        "min": 237.46391303063518,
+        "max": 267.8848104069726
+      },
+      "elapsedMs": {
+        "median": 7597.111881,
+        "min": 7465.895498,
+        "max": 8422.332364
+      },
+      "p50Ms": {
+        "median": 190.88976500000035,
+        "min": 186.564844,
+        "max": 207.13790299999982
+      },
+      "p95Ms": {
+        "median": 228.75327100000004,
+        "min": 222.89334199999985,
+        "max": 264.3704759999998
+      },
+      "p99Ms": {
+        "median": 240.9303520000003,
+        "min": 232.80537000000004,
+        "max": 287.9437019999996
+      }
+    },
+    {
+      "shape": "many",
+      "concurrency": 1,
+      "repetitions": 3,
+      "files": [
+        "many-c1-r1.json",
+        "many-c1-r2.json",
+        "many-c1-r3.json"
+      ],
+      "requestsPerSecond": {
+        "median": 221.67714521600936,
+        "min": 209.5086686495822,
+        "max": 234.14760311009374
+      },
+      "elapsedMs": {
+        "median": 9022.1299,
+        "min": 8541.620642,
+        "max": 9546.144381
+      },
+      "p50Ms": {
+        "median": 4.161836999999878,
+        "min": 4.008061999999882,
+        "max": 4.249234999999771
+      },
+      "p95Ms": {
+        "median": 6.627277000000049,
+        "min": 5.856335999999828,
+        "max": 7.543023000000176
+      },
+      "p99Ms": {
+        "median": 8.497834000000012,
+        "min": 7.594327999999223,
+        "max": 16.260583000000224
+      }
+    },
+    {
+      "shape": "many",
+      "concurrency": 10,
+      "repetitions": 3,
+      "files": [
+        "many-c10-r1.json",
+        "many-c10-r2.json",
+        "many-c10-r3.json"
+      ],
+      "requestsPerSecond": {
+        "median": 1015.5734620667212,
+        "min": 1003.9276949328249,
+        "max": 1127.4686035001826
+      },
+      "elapsedMs": {
+        "median": 1969.330703,
+        "min": 1773.885316,
+        "max": 1992.175343
+      },
+      "p50Ms": {
+        "median": 9.364557999999988,
+        "min": 8.59059400000001,
+        "max": 9.476709000000028
+      },
+      "p95Ms": {
+        "median": 14.145246999999927,
+        "min": 11.772142000000258,
+        "max": 14.205155999999988
+      },
+      "p99Ms": {
+        "median": 17.359758000000056,
+        "min": 14.327784000000065,
+        "max": 18.743430999999987
+      }
+    },
+    {
+      "shape": "many",
+      "concurrency": 50,
+      "repetitions": 3,
+      "files": [
+        "many-c50-r1.json",
+        "many-c50-r2.json",
+        "many-c50-r3.json"
+      ],
+      "requestsPerSecond": {
+        "median": 1053.5993476559565,
+        "min": 920.7722527933444,
+        "max": 1123.61687643222
+      },
+      "elapsedMs": {
+        "median": 1898.2547820000002,
+        "min": 1779.9661450000003,
+        "max": 2172.0897800000002
+      },
+      "p50Ms": {
+        "median": 46.01079299999992,
+        "min": 42.61061900000004,
+        "max": 52.26709000000005
+      },
+      "p95Ms": {
+        "median": 56.54883800000016,
+        "min": 54.274640999999974,
+        "max": 70.99914100000001
+      },
+      "p99Ms": {
+        "median": 75.85516900000005,
+        "min": 63.67256700000007,
+        "max": 76.65007100000003
+      }
+    }
+  ]
+}

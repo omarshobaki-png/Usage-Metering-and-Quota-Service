@@ -1,0 +1,2600 @@
+{
+  "schemaVersion": 1,
+  "runId": "423b9f28-1734-4797-8d7d-15cef79acb51",
+  "rawRun": "hot-c10-r3.json",
+  "minimumIntervalMs": 25,
+  "summary": {
+    "sampleCount": 235,
+    "samplesWithAccountLockWait": 234,
+    "fractionWithAccountLockWait": 0.9957446808510638,
+    "meanBackends": 10,
+    "meanActive": 8.97872340425532,
+    "meanLockWaiting": 8.51063829787234,
+    "meanAccountLockWaiting": 8.51063829787234,
+    "peakAccountLockWaiting": 9,
+    "lockEventObservations": {
+      "transactionid": 230,
+      "tuple": 1770
+    }
+  },
+  "samples": [
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1.6745760000048904
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 27.640544000001682
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "tuple": 8
+      },
+      "elapsedMs": 54.10345200000302
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 80.14109599999938
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 105.62467599999945
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 131.13119800000277
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 156.98064100000192
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 182.74477399999887
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 208.61208199999965
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 234.5615020000041
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 260.35031800000434
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 286.5756660000043
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 312.85191399999894
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 338.4366940000036
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 364.89432300000044
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 391.1680320000014
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 417.2759240000014
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 443.89174900000216
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 469.2093820000009
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 495.24949899999774
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 522.4372359999979
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 549.0942460000006
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 575.2954360000003
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 601.6621930000038
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 628.1102719999981
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 653.2086249999993
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 679.3995510000022
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 706.7004579999993
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 732.5405559999999
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 758.8861279999983
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "tuple": 8
+      },
+      "elapsedMs": 784.9498319999984
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 811.4267660000041
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 837.5019480000046
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 863.7215770000039
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 889.4240480000008
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 915.6245310000013
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 942.1818459999995
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 968.9411970000001
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 994.7853370000012
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1021.6467850000045
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1048.2296690000003
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1074.683011000001
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1101.2642970000015
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1127.4279180000012
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1153.8736500000014
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1179.9485810000042
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1205.997132000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1232.0106979999982
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1257.900910000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1283.5634629999986
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1309.9635710000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1335.8132110000006
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1361.4221620000026
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1388.2832439999984
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1414.7630340000032
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1440.961943000002
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1466.802033
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1493.1095270000005
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1519.2507540000006
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1545.7764309999984
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1571.1589870000025
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1596.6464229999983
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1622.9994129999977
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1648.6470889999982
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1675.9927830000015
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1702.7692339999994
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1731.5157130000007
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "tuple": 8
+      },
+      "elapsedMs": 1758.9108859999978
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1784.8081559999991
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1810.696971999998
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1836.9585950000037
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1862.5509930000044
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1889.216787999998
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1916.2047959999982
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1943.0115839999999
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 1968.599467
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 1994.6676579999985
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2021.3801870000025
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2048.129498000002
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2073.572702999998
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2099.5482430000047
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2125.565014
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2151.50677
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2178.1465370000005
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2204.5362620000014
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2230.5740710000027
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2257.0986210000046
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2283.066120000003
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2308.5832930000033
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2334.8094090000013
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2360.910622000003
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2386.4102770000027
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2412.996127999999
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2438.231412000001
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2464.7406330000013
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2491.086602000003
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2516.382856000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2543.0486949999977
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2568.4009080000033
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2594.736954
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2620.7165779999996
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2646.5385040000037
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2672.405316000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2698.5897410000034
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2724.4297110000043
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2750.5753020000047
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2776.339832999998
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2802.289235000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 2829.103044000003
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2854.7272520000042
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2880.1853919999994
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2907.0663019999993
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2932.389105000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2958.0913510000028
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 2984.597453000002
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "tuple": 8
+      },
+      "elapsedMs": 3010.922872000003
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3036.6229900000035
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3062.7202840000027
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3089.4854689999993
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3115.423794000002
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3141.3494199999986
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3167.3275150000045
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3193.940260000003
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3219.6325460000007
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3246.1331869999995
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3271.8311820000017
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3297.9353120000014
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3323.566378000003
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3349.7507590000023
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3375.2698260000034
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3401.216698000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3428.056706000003
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3453.842380000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3479.501565999999
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3505.7256140000027
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3532.1380659999995
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3557.3427840000004
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3584.052681000001
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3610.1286800000016
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3635.730352999999
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3661.4719990000012
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3687.847507999999
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3713.934181000004
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3739.9062610000037
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3765.1449839999987
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3791.276313000002
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3818.094076000001
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3844.051572000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3870.3567610000027
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3897.406038000001
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 3924.1551190000027
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3949.3020279999982
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 3975.673714000004
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4001.333821
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4027.9688309999983
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4053.5809690000024
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4079.934734000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4105.577303999999
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4132.083749999998
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4157.680630000003
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4183.338520999998
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4210.020152000005
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4235.354626
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4261.759871000002
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4287.630413999999
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4314.268797000004
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4340.292524000004
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4366.237215000001
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4393.059653000004
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4419.172983000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4445.367410999999
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4471.751129000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4497.689136000001
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4523.1974340000015
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4550.230105000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4577.366862000003
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4604.088715999998
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4629.607634
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4655.685964000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4681.337630000002
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4707.455304000003
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4733.557930000003
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4759.456092
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4785.3751459999985
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4811.442198000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 4837.883869999998
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4863.453326000003
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4889.134482000001
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4914.453549999998
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4940.362206999998
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4966.706982000003
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 4992.610565000003
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5019.779533000001
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5046.089006000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5071.502922
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5097.271290000004
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5124.100332000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5150.001702000001
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5175.708879999998
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5202.103663000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5227.354231999998
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5253.625091000002
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5279.484246
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5305.585621999999
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5331.088497000004
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5356.809533
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5383.948405000003
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5410.185678000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5437.134784000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5462.560094
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5488.675435999998
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5514.342789000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5540.058918000002
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5565.422499
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5592.256601000001
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5618.342966000004
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5644.230551000001
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5670.659454000001
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5696.698126000003
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5722.347665000001
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5749.237261000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5775.691632000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5801.459464
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5827.156823999998
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5852.436455000003
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5879.389041000002
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5905.304347000005
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 5931.471997000001
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5958.166207000002
+    },
+    {
+      "backends": 10,
+      "active": 10,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 5984.370542000004
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 6010.829615000002
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 6037.0521020000015
+    },
+    {
+      "backends": 10,
+      "active": 9,
+      "lockWaiting": 9,
+      "accountLockWaiting": 9,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 8
+      },
+      "elapsedMs": 6062.864807999998
+    },
+    {
+      "backends": 10,
+      "active": 8,
+      "lockWaiting": 8,
+      "accountLockWaiting": 8,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 7
+      },
+      "elapsedMs": 6088.939713
+    },
+    {
+      "backends": 10,
+      "active": 7,
+      "lockWaiting": 6,
+      "accountLockWaiting": 6,
+      "lockEvents": {
+        "transactionid": 1,
+        "tuple": 5
+      },
+      "elapsedMs": 6114.359754000005
+    }
+  ]
+}

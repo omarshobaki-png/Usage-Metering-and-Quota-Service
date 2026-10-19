@@ -230,7 +230,14 @@ try {
   pass("isolated stack healthy; random localhost ports and dedicated named volume");
 
   phase = "meter chapter regression checkpoint";
-  const output = await command(process.execPath, ["./node_modules/vitest/vitest.mjs", "run"], {
+  const seed = process.env.VERIFY_TEST_SEED;
+  if (seed !== undefined) {
+    assert(/^[0-9]+$/.test(seed) && Number(seed) <= 2_147_483_647, "Invalid test shuffle seed.");
+    console.log(`Vitest shuffled files/tests with seed ${seed}`);
+  }
+  const output = await command(process.execPath, ["./node_modules/vitest/vitest.mjs", "run",
+    ...(seed === undefined ? [] : ["--sequence.shuffle", `--sequence.seed=${seed}`])
+  ], {
     ...environment, TEST_DATABASE_URL: databaseUrl
   });
   const plain = output.replace(/\u001b\[[0-9;]*m/g, "");

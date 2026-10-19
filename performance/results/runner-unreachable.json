@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "runId": "e2e1cea3-358c-4f3c-a96a-11a8533e6666",
+  "startedAt": "2026-10-18T09:16:08.976Z",
+  "finishedAt": "2026-10-18T09:16:09.022Z",
+  "settings": {
+    "workload": "throughput",
+    "baseUrl": "http://127.0.0.1:32799",
+    "accounts": 1,
+    "usersPerAccount": 2,
+    "concurrency": 2,
+    "requests": 20,
+    "timeoutMs": 1000,
+    "units": 1,
+    "accountMonthlyLimit": 20,
+    "userMonthlyLimit": 20,
+    "requestLimit": 20,
+    "distribution": "round-robin accounts and users",
+    "workloadModel": "closed-loop bounded workers"
+  },
+  "versions": {
+    "runner": "1.0.0",
+    "node": "v22.22.1",
+    "undici": null,
+    "application": "0.1.0",
+    "postgres": null
+  },
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "osRelease": "6.18.33.2-microsoft-standard-WSL2",
+    "logicalCpus": 16,
+    "cpuModel": "13th Gen Intel(R) Core(TM) i7-13620H",
+    "memoryBytes": 8130293760
+  },
+  "source": {
+    "commit": "36cd2520936fa9b2dc8a25fbd09c2e23541a1bef",
+    "dirty": true
+  },
+  "status": "failed",
+  "measurements": null,
+  "verification": null,
+  "failure": {
+    "stage": "API readiness",
+    "message": "Run failed. Check API/database connectivity, matching pepper, and fixture permissions. No benchmark requests were retried."
+  }
+}

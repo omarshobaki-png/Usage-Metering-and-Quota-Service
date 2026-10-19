@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "runId": "3920dbd5-7c5b-44d5-aa65-c8818a4eb371",
+  "startedAt": "2026-10-18T09:15:36.061Z",
+  "finishedAt": "2026-10-18T09:15:36.270Z",
+  "settings": {
+    "workload": "throughput",
+    "baseUrl": "http://127.0.0.1:32799",
+    "accounts": 1,
+    "usersPerAccount": 2,
+    "concurrency": 2,
+    "requests": 20,
+    "timeoutMs": 10000,
+    "units": 1,
+    "accountMonthlyLimit": 20,
+    "userMonthlyLimit": 20,
+    "requestLimit": 20,
+    "distribution": "round-robin accounts and users",
+    "workloadModel": "closed-loop bounded workers"
+  },
+  "versions": {
+    "runner": "1.0.0",
+    "node": "v22.22.1",
+    "undici": null,
+    "application": "0.1.0",
+    "postgres": "17.6 (Debian 17.6-2.pgdg12+1)"
+  },
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "osRelease": "6.18.33.2-microsoft-standard-WSL2",
+    "logicalCpus": 16,
+    "cpuModel": "13th Gen Intel(R) Core(TM) i7-13620H",
+    "memoryBytes": 8130293760
+  },
+  "source": {
+    "commit": "36cd2520936fa9b2dc8a25fbd09c2e23541a1bef",
+    "dirty": true
+  },
+  "status": "passed",
+  "measurements": {
+    "attempted": 20,
+    "completed": 20,
+    "maxInFlight": 2,
+    "elapsedMs": 95.62438199999997,
+    "completedPerSecond": 209.1516784913706,
+    "acceptedPerSecond": 209.1516784913706,
+    "latencyMs": {
+      "sampleCount": 20,
+      "p50": 8.262492000000009,
+      "p95": 17.290310000000034,
+      "p99": 19.567680999999993
+    },
+    "counts": {
+      "accepted": 20,
+      "quotaRejected": 0,
+      "unexpectedHttpStatus": 0,
+      "timeout": 0,
+      "networkError": 0,
+      "invalidResponse": 0
+    },
+    "httpStatuses": {
+      "200": 20
+    },
+    "retries": 0,
+    "latencyScope": "One HTTP attempt including response body; excludes queue wait, fixture setup and reconciliation. Includes failed attempts. No retries or redirects."
+  },
+  "verification": {
+    "passed": true,
+    "errors": [],
+    "accountConsumed": 20,
+    "sumUserConsumed": 20,
+    "uniqueAcceptedDecisionUnits": 20,
+    "acceptedDecisions": 20,
+    "rejectedDecisions": 0,
+    "accounts": [
+      {
+        "accountId": "a51e5553-82d1-42d9-b075-6a086c1e46fe",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 20,
+        "accountConsumed": 20,
+        "sumUserConsumed": 20,
+        "uniqueAcceptedDecisionUnits": 20,
+        "decisionCount": 20,
+        "uniqueDecisionCount": 20,
+        "users": [
+          {
+            "userId": "c41e6e8a-ff7e-4eeb-adbf-67de350b7bf6",
+            "consumed": 10,
+            "monthlyLimit": 20,
+            "acceptedDecisionUnits": 10
+          },
+          {
+            "userId": "93d9e8b6-cb55-4958-a2aa-706938641d3e",
+            "consumed": 10,
+            "monthlyLimit": 20,
+            "acceptedDecisionUnits": 10
+          }
+        ]
+      }
+    ]
+  },
+  "failure": null
+}
