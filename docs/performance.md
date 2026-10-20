@@ -14,27 +14,27 @@ contention for the busy account. These are local measurements, not an SLA.
 
 ## Reproduce the experiments
 
-Requirements: Node 22, locked dependencies installed with §npm ci§, Docker,
+Requirements: Node 22, locked dependencies installed with `npm ci`, Docker,
 and Compose. Run from the repository root:
 
-§§§bash
+```bash
 npm run perf:compare
 npm run perf:diagnose
-§§§
+```
 
 Both build the current API and create unique projects from
 [compose.reliability.yaml](../compose.reliability.yaml), with random localhost
-ports and fresh volumes. They do not load the host §.env§ or use development data.
+ports and fresh volumes. They do not load the host `.env` or use development data.
 Keys are generated at runtime and kept in memory.
 
 The captured invocations selected these evidence directories:
 
-§§§bash
+```bash
 npm run perf:compare -- --output-dir performance/results/account-comparison
 npm run perf:diagnose -- --output-dir performance/results/lock-diagnostics
-§§§
+```
 
-When repeating, omit §--output-dir§ for a unique timestamped directory or choose
+When repeating, omit `--output-dir` for a unique timestamped directory or choose
 a new path. Existing directories are refused. Successful runs verify resource
 ownership before removing their disposable containers, network, and volume;
 failed runs retain their volume for diagnosis. Raw results remain available.
@@ -146,10 +146,10 @@ The [driver](../performance/diagnose.ts) uses the same two shapes, 20 total user
 limits, 2,000 requests, and three repetitions, at concurrency 10 only.
 Two separate 500-request warmups precede the six measured loads.
 
-A separate read-only observer queries §pg_stat_activity§ and §pg_blocking_pids§,
+A separate read-only observer queries `pg_stat_activity` and `pg_blocking_pids`,
 filtered to the API's network address/application name in the test database.
 The [sampler](../performance/lock-sampling.ts) identifies blocking at the account
-§FOR UPDATE§ statement. It excludes fixture/observer connections and stores only
+`FOR UPDATE` statement. It excludes fixture/observer connections and stores only
 aggregate counts; query text and backend PIDs are not saved.
 
 Sampling spans the workload, before reconciliation. Queries are sequential with
@@ -179,7 +179,7 @@ each accepted and reconciled 500, excluded from measured totals.
 
 Every diagnostic sample saw ten API backend connections. Hot-account samples
 averaged 8.43–8.51 blocked at the account-lock statement; independent accounts
-averaged 0–0.03. Recorded §tuple§ and §transactionid§ events, together with the
+averaged 0–0.03. Recorded `tuple` and `transactionid` events, together with the
 blocking-PID check, provide direct evidence of account-row lock contention.
 
 That contention is the strongest directly observed hot-account constraint.
@@ -192,8 +192,8 @@ process, so its timings are separate observations rather than optimization gains
 
 One candidate is to remove a redundant usage-read round trip while keeping the
 account lock. In [usage-repository.ts](../src/modules/usage/usage-repository.ts),
-§ensureUserUsageBucket§ already reads the owned bucket to validate its conflict;
-§consume§ then calls §getUserUsage§ under the same lock.
+`ensureUserUsageBucket` already reads the owned bucket to validate its conflict;
+`consume` then calls `getUserUsage` under the same lock.
 
 Returning and reusing that validated value could shorten lock-held work, but
 changes the repository contract and must preserve ownership/missing-row checks.
@@ -225,16 +225,16 @@ Run them through the [full verification gate](../README.md#tests).
 ## Load runner
 
 For one configurable scenario, use the existing local/test API and database.
-Requirements are Node 22, §npm ci§, and a private §.env§ whose §DATABASE_URL§ and
-§API_KEY_PEPPER§ match that API. The role needs fixture/verification permissions.
+Requirements are Node 22, `npm ci`, and a private `.env` whose `DATABASE_URL` and
+`API_KEY_PEPPER` match that API. The role needs fixture/verification permissions.
 
-§§§bash
+```bash
 docker compose up -d --build --wait api
 npm run config:check
 npm run perf -- --requests 20 --concurrency 2
 npm run perf -- --workload correctness --concurrency 20
 npm run perf -- --help
-§§§
+```
 
 This workflow creates fresh dedicated fixtures in the selected database and
 retains them for inspection; it never resets existing accounts. The
@@ -257,7 +257,7 @@ The CLI entry is [run.ts](../performance/run.ts).
 | `--output` | Unique timestamp/workload/UUID path under `performance/results/` | New `.json` result path; existing files are refused before fixture setup |
 
 Throughput uses monthly limits equal to the total request count by default;
-§--monthly-limit§ can add headroom. Both per-request limits equal request count.
+`--monthly-limit` can add headroom. Both per-request limits equal request count.
 The correctness workload fixes one account, 200 unique one-unit actions,
 account allowance 100, and user/per-request limits 200: exactly 100 accepts
 and 100 account-monthly rejections are expected.
@@ -303,9 +303,9 @@ Invalid options or an existing/unwritable output path fail without a success cla
 [report.ts](../performance/report.ts) validates versioned JSON before writing.
 The [JSON schema](../performance/result.schema.json) can be regenerated to stdout:
 
-§§§bash
+```bash
 node --import tsx performance/schema.ts
-§§§
+```
 
 Results record settings, outcome/status counts, rates, latency, reconciliation,
 tool/runtime versions, machine details, timestamps, and source commit/dirty

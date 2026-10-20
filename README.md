@@ -424,12 +424,12 @@ Focused `npm test`/Vitest runs should explicitly select a disposable
 `TEST_DATABASE_URL`. The concurrency suite also needs CREATEDB.
 `npm run typecheck` and `npm run build` can be run separately.
 
-The full workspace gate passed twice on October 19, 2026, with seeds
-2113957158 and 411: **439 tests across 35 files**, API/PostgreSQL restarts,
-default Compose startup, and retained-data checks. These are local workspace
-results; a clean-checkout rehearsal of the final submitted revision remains
-a separate check. Controlled faults and graceful restarts do not simulate every
-hardware failure, network partition, or availability condition.
+The latest `npm run verify` passed on October 20, 2026, at revision `1563041`
+with shuffle seed `284991350`: typecheck, production build, **439 tests**,
+actual API/PostgreSQL restarts, default Compose demo startup, and retained-data
+checks. This run used the local workspace with disposable Docker stacks.
+Controlled faults and graceful restarts do not simulate every hardware failure,
+network partition, or availability condition.
 
 ## Performance
 
