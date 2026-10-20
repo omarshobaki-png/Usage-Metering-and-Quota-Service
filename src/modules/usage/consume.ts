@@ -17,7 +17,6 @@ import {
   ensureAccountUsageBucket,
   ensureUserUsageBucket,
   getAccountUsage,
-  getUserUsage,
   incrementAccountUsage,
   incrementUserUsage
 } from "./usage-repository.js";
@@ -125,9 +124,8 @@ export async function consume(
     const month = getUtcMonth(processedAt);
 
     await ensureAccountUsageBucket(client, accountId, month);
-    await ensureUserUsageBucket(client, accountId, input.userId, month);
+    const userConsumed = await ensureUserUsageBucket(client, accountId, input.userId, month);
     const accountConsumed = await getAccountUsage(client, accountId, month);
-    const userConsumed = await getUserUsage(client, accountId, input.userId, month);
     const accountLimits = {
       monthlyLimit: accountPlan.monthlyLimit,
       maxUnitsPerRequest: accountPlan.maxUnitsPerRequest

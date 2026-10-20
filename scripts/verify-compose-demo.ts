@@ -17,7 +17,7 @@ const environment = {
   COMPOSE_FILE: "compose.yaml",
   COMPOSE_PROFILES: "",
   API_PORT: "127.0.0.1:0",
-  POSTGRES_PORT: "127.0.0.1:0",
+  POSTGRES_PORT: "0", // compose.yaml already binds PostgreSQL to localhost.
   API_KEY_PEPPER: pepper
 };
 let pool: Pool | undefined;

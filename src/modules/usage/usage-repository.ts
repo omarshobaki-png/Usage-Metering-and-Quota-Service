@@ -71,7 +71,7 @@ export async function ensureUserUsageBucket(
   accountId: string,
   userId: string,
   month: UtcMonth
-): Promise<void> {
+): Promise<number> {
   await client.query(
     `
       INSERT INTO user_monthly_usage (account_id, user_id, usage_month)
@@ -92,9 +92,13 @@ export async function ensureUserUsageBucket(
     [accountId, userId, month]
   );
 
-  if (result.rows[0] === undefined) {
+  const row = result.rows[0];
+
+  if (row === undefined) {
     throw new UsageBucketNotFoundError();
   }
+
+  return row.consumed;
 }
 
 export async function incrementAccountUsage(

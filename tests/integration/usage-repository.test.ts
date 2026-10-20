@@ -146,10 +146,11 @@ describe("monthly usage buckets", () => {
         ensureAccountUsageBucket(first, fixture.accountA.id, october),
         ensureAccountUsageBucket(second, fixture.accountA.id, october)
       ]);
-      await Promise.all([
+      const userTotals = await Promise.all([
         ensureUserUsageBucket(first, fixture.accountA.id, fixture.userA.id, october),
         ensureUserUsageBucket(second, fixture.accountA.id, fixture.userA.id, october)
       ]);
+      expect(userTotals).toEqual([0, 0]);
       const counts = await first.query(`
         SELECT
           (SELECT count(*) FROM account_monthly_usage) AS accounts,
@@ -168,7 +169,7 @@ describe("monthly usage buckets", () => {
     await recordFixtureUsage(fixture.accountA.id, fixture.userA.id, october, 3);
     await withClient(async (client) => {
       await ensureAccountUsageBucket(client, fixture.accountA.id, october);
-      await ensureUserUsageBucket(client, fixture.accountA.id, fixture.userA.id, october);
+      expect(await ensureUserUsageBucket(client, fixture.accountA.id, fixture.userA.id, october)).toBe(3);
       expect(await getAccountUsage(client, fixture.accountA.id, october)).toBe(3);
       expect(await getUserUsage(client, fixture.accountA.id, fixture.userA.id, october)).toBe(3);
     });

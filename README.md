@@ -354,6 +354,30 @@ CLI / HTTP client → Fastify → domain rules + account-locked SQL → PostgreS
 
 Strict TypeScript checks code; Zod validates runtime JSON; pg uses parameterized SQL.
 
+### Trace a consumption request
+
+For `POST /consume`, follow these functions in order:
+
+1. [createAuthenticateApiKeyHook](src/middleware/authenticate-api-key.ts) validates
+   the header key and resolves its account through `createApiKeyAuthenticator`.
+2. [registerConsumptionRoutes](src/modules/usage/routes.ts) validates the body and
+   calls [consume](src/modules/usage/consume.ts) with the authenticated account ID.
+3. [withLockedAccountTransaction](src/db/account-transaction.ts) starts a
+   READ COMMITTED transaction and locks that account before mutable rule reads.
+4. `consume` checks user ownership and the saved request ID. An identical retry
+   returns its original decision; a changed payload raises a conflict.
+5. For a new ID, `consume` reads current plans and captures the UTC processing
+   month, then [evaluateRules](src/modules/usage/evaluate-rules.ts) checks both
+   per-request caps and both monthly allowances.
+6. An acceptance updates both counters through the
+   [usage repository](src/modules/usage/usage-repository.ts). Both accepted and
+   rejected decisions are saved by `consume` with their original rule/balance
+   snapshots; a rejection leaves consumption unchanged.
+7. `withLockedAccountTransaction` commits before the route sends the decision.
+   Any transaction failure rolls back its writes and releases the connection.
+
+### Database tables
+
 | Table | Responsibility / key |
 | --- | --- |
 | accounts | Account identity, unique key digest, account-plan assignment; UUID ID |
@@ -424,10 +448,11 @@ Focused `npm test`/Vitest runs should explicitly select a disposable
 `TEST_DATABASE_URL`. The concurrency suite also needs CREATEDB.
 `npm run typecheck` and `npm run build` can be run separately.
 
-The latest `npm run verify` passed on October 20, 2026, at revision `1563041`
-with shuffle seed `284991350`: typecheck, production build, **439 tests**,
-actual API/PostgreSQL restarts, default Compose demo startup, and retained-data
-checks. This run used the local workspace with disposable Docker stacks.
+The latest `npm run verify` passed on October 20, 2026, with shuffle seed
+`858541562`: typecheck, production build, **439 tests**, actual API/PostgreSQL
+restarts, default Compose demo startup, and retained-data checks. This run used
+the local workspace based on `d27aeea`, including the uncommitted localhost-only
+PostgreSQL binding and usage-read refactor, with disposable Docker stacks.
 Controlled faults and graceful restarts do not simulate every hardware failure,
 network partition, or availability condition.
 
@@ -454,7 +479,7 @@ private environment and retains its newly provisioned fixtures in that database.
 | --- | --- |
 | API_KEY_PEPPER | Private stable secret, at least 16 characters; shared by API/init/demo and host provisioning |
 | API_PORT | Published API port, default 3000; internal API stays api:3000 |
-| POSTGRES_PORT | Published DB port; .env.example selects 55432, Compose fallback is 5432 |
+| POSTGRES_PORT | DB port published on 127.0.0.1 only; .env.example selects 55432, Compose fallback is 5432 |
 | DATABASE_URL | Host DB connection; match the published DB port |
 | HOST / PORT / NODE_ENV | Host server options; defaults 0.0.0.0 / 3000 / development |
 | DEMO_SERVICE_URL / PERF_BASE_URL | Optional host demo/load API origin |

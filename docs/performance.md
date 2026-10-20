@@ -188,18 +188,18 @@ times, per-statement costs, or CPU/storage utilization. Short waits may fall
 between samples. The observer adds work, and the diagnostic reuses a generator
 process, so its timings are separate observations rather than optimization gains.
 
-### Improvement considered
+### Follow-up improvement
 
-One candidate is to remove a redundant usage-read round trip while keeping the
-account lock. In [usage-repository.ts](../src/modules/usage/usage-repository.ts),
-`ensureUserUsageBucket` already reads the owned bucket to validate its conflict;
-`consume` then calls `getUserUsage` under the same lock.
+The current implementation removes one redundant usage-read round trip while
+keeping the account lock. In
+[usage-repository.ts](../src/modules/usage/usage-repository.ts),
+`ensureUserUsageBucket` returns the consumed units from its ownership check;
+[consume](../src/modules/usage/consume.ts) reuses that value for rule evaluation.
+The ownership and missing-bucket checks remain in place.
 
-Returning and reusing that validated value could shorten lock-held work, but
-changes the repository contract and must preserve ownership/missing-row checks.
-**No optimization or speedup was implemented or measured.** A next experiment
-would measure pool/statement/lock-held time, apply the small refactor, rerun the
-regression gate, and repeat the same uninstrumented comparison.
+The saved measurements above predate this refactor. **No speedup has been
+measured for this change.** A future experiment could measure pool, statement,
+and lock-held time and repeat the same uninstrumented comparison.
 
 ## Correctness during plan changes
 
