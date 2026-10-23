@@ -3,7 +3,7 @@ import { createPool } from "../src/db/pool.js";
 import { normalizeServiceUrl, runDemoScenario } from "./client.js";
 import { createDemoFixture } from "./setup.js";
 
-// Keeping setup and the client together avoids a credential file or key output.
+
 async function main(): Promise<void> {
   const config = loadConfig();
   const serviceUrl = normalizeServiceUrl(

@@ -354,14 +354,20 @@ CLI / HTTP client → Fastify → domain rules + account-locked SQL → PostgreS
 
 Strict TypeScript checks code; Zod validates runtime JSON; pg uses parameterized SQL.
 
+[createAppOperations](src/app-operations.ts) connects the database pool to the
+service operations for both server startup and integration tests. Tests can pass
+a clock and failure hooks or override operations that need separate pools.
+
 ### Trace a consumption request
 
 For `POST /consume`, follow these functions in order:
 
 1. [createAuthenticateApiKeyHook](src/middleware/authenticate-api-key.ts) validates
    the header key and resolves its account through `createApiKeyAuthenticator`.
-2. [registerConsumptionRoutes](src/modules/usage/routes.ts) validates the body and
-   calls [consume](src/modules/usage/consume.ts) with the authenticated account ID.
+2. [registerConsumptionRoutes](src/modules/usage/routes.ts) passes the body and
+   authenticated account ID to [consume](src/modules/usage/consume.ts), which
+   validates the input once before opening a transaction. Fresh decisions and
+   snapshots use TypeScript types; stored snapshots are validated when read.
 3. [withLockedAccountTransaction](src/db/account-transaction.ts) starts a
    READ COMMITTED transaction and locks that account before mutable rule reads.
 4. `consume` checks user ownership and the saved request ID. An identical retry
