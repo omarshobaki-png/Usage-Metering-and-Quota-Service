@@ -5,14 +5,10 @@ import { Pool } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
-import { assignAccountPlan, assignUserPlan } from "../../src/modules/plans/assignment.js";
-import { createCustomPlan, getPlan, listPlans, updateCustomPlan } from "../../src/modules/plans/service.js";
-import { consume, type ConsumeOptions } from "../../src/modules/usage/consume.js";
-import { readAccountRules, readUserRules, readAccountUsage, readUserUsage } from "../../src/modules/usage/queries.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
+import { type ConsumeOptions } from "../../src/modules/usage/consume.js";
 import { createTwoAccountFixture, type TwoAccountFixture } from "../fixtures/two-account.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -31,33 +27,7 @@ const apps: FastifyInstance[] = [];
 
 function createTestApp(options: ConsumeOptions = {}) {
   const app = buildApp({
-    checkDatabase: async () => { await pool.query("SELECT 1"); },
-    authenticateAccount: createApiKeyAuthenticator(pool, pepper),
-    userOperations: {
-      createUser: async (accountId, input) => createUser(pool, accountId, input),
-      getUser: async (accountId, userId) => getUser(pool, accountId, userId)
-    },
-    planOperations: {
-      createCustomPlan: async (accountId, input) => createCustomPlan(pool, accountId, input),
-      getPlan: async (accountId, planId) => getPlan(pool, accountId, planId),
-      listPlans: async (accountId, scope) => listPlans(pool, accountId, scope),
-      updateCustomPlan: async (accountId, planId, input) => updateCustomPlan(pool, accountId, planId, input)
-    },
-    assignmentOperations: {
-      assignAccountPlan: async (accountId, planId) => assignAccountPlan(pool, accountId, planId),
-      assignUserPlan: async (accountId, userId, planId) => assignUserPlan(pool, accountId, userId, planId)
-    },
-    consumptionOperations: {
-      consume: async (accountId, input) => consume(pool, accountId, input, { clock, ...options })
-    },
-    usageOperations: {
-      readAccountUsage: async (accountId, month) => readAccountUsage(pool, accountId, month, { clock }),
-      readUserUsage: async (accountId, userId, month) => readUserUsage(pool, accountId, userId, month, { clock })
-    },
-    ruleOperations: {
-      readAccountRules: async (accountId) => readAccountRules(pool, accountId, { clock }),
-      readUserRules: async (accountId, userId) => readUserRules(pool, accountId, userId, { clock })
-    },
+    ...createAppOperations(pool, pepper, { clock, ...options }),
     logger: false
   });
   apps.push(app);

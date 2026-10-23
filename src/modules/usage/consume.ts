@@ -5,14 +5,10 @@ import type { Clock } from "../../shared/clock.js";
 import { RequestIdConflictError } from "../../shared/errors.js";
 import { consumeBodySchema, parseRequestBody } from "../../shared/validation.js";
 import { validatePlanAssignment } from "../plans/assignment.js";
-import {
-  parseConsumptionDecision,
-  type ConsumeRequest,
-  type ConsumptionDecision
-} from "./contract.js";
+import type { ConsumptionDecision } from "./contract.js";
 import { evaluateRules } from "./evaluate-rules.js";
 import { getUtcMonth } from "./month.js";
-import { parseConsumptionSnapshot } from "./snapshot.js";
+import { parseConsumptionSnapshot, type ConsumptionSnapshot } from "./snapshot.js";
 import {
   ensureAccountUsageBucket,
   ensureUserUsageBucket,
@@ -44,9 +40,10 @@ export interface ConsumeOptions {
 export async function consume(
   pool: Pool,
   accountId: string,
-  request: ConsumeRequest,
+  request: unknown,
   options: ConsumeOptions = {}
 ): Promise<ConsumptionDecision | null> {
+  // Validate here once, before opening a transaction, for HTTP and direct callers.
   const parsed = parseRequestBody(consumeBodySchema, request);
   const input = { ...parsed, userId: parsed.userId.toLowerCase() };
 
@@ -139,12 +136,11 @@ export async function consume(
       account: { ...accountLimits, consumed: accountConsumed },
       user: { ...userLimits, consumed: userConsumed }
     });
-    const decision = parseConsumptionDecision({
+    const decision: ConsumptionDecision = {
       ...input,
+      ...evaluation,
       processedAt: processedAt.toISOString(),
       month: month.slice(0, 7),
-      accepted: evaluation.accepted,
-      blockedBy: evaluation.blockedBy,
       account: {
         ...evaluation.account,
         plan: { id: accountPlan.id, revision: accountPlan.revision }
@@ -153,7 +149,7 @@ export async function consume(
         ...evaluation.user,
         plan: { id: userPlan.id, revision: userPlan.revision }
       }
-    });
+    };
 
     if (evaluation.accepted) {
       const accountTotal = await incrementAccountUsage(client, accountId, month, input.units);
@@ -165,10 +161,10 @@ export async function consume(
       }
     }
 
-    const snapshot = parseConsumptionSnapshot({
+    const snapshot: ConsumptionSnapshot = {
       response: decision,
       evaluatedLimits: { account: accountLimits, user: userLimits }
-    });
+    };
     await client.query(
       `
         INSERT INTO request_decisions (

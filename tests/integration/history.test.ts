@@ -7,14 +7,13 @@ import { Pool } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
-import { assignAccountPlan, assignUserPlan } from "../../src/modules/plans/assignment.js";
-import { createCustomPlan, getPlan, listPlans, updateCustomPlan } from "../../src/modules/plans/service.js";
+import { assignUserPlan } from "../../src/modules/plans/assignment.js";
 import { consume, type ConsumeOptions } from "../../src/modules/usage/consume.js";
 import { readHistory, type HistoryPage } from "../../src/modules/usage/history.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
+import { createUser } from "../../src/modules/users/service.js";
 import { createTwoAccountFixture, type TwoAccountFixture } from "../fixtures/two-account.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -33,24 +32,7 @@ const clock = () => new Date(instant);
 
 function createTestApp(options: ConsumeOptions = {}) {
   const app = buildApp({
-    checkDatabase: async () => { await pool.query("SELECT 1"); },
-    authenticateAccount: createApiKeyAuthenticator(pool, pepper),
-    userOperations: {
-      createUser: async (accountId, input) => createUser(pool, accountId, input),
-      getUser: async (accountId, userId) => getUser(pool, accountId, userId)
-    },
-    planOperations: {
-      createCustomPlan: async (accountId, input) => createCustomPlan(pool, accountId, input),
-      getPlan: async (accountId, id) => getPlan(pool, accountId, id),
-      listPlans: async (accountId, scope) => listPlans(pool, accountId, scope),
-      updateCustomPlan: async (accountId, id, input) => updateCustomPlan(pool, accountId, id, input)
-    },
-    assignmentOperations: {
-      assignAccountPlan: async (accountId, id) => assignAccountPlan(pool, accountId, id),
-      assignUserPlan: async (accountId, userId, id) => assignUserPlan(pool, accountId, userId, id)
-    },
-    consumptionOperations: { consume: async (accountId, input) => consume(pool, accountId, input, { clock, ...options }) },
-    historyOperations: { readHistory: async (accountId, query) => readHistory(pool, accountId, query) },
+    ...createAppOperations(pool, pepper, { clock, ...options }),
     logger: false
   });
   apps.push(app);

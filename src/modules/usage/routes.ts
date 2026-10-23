@@ -1,31 +1,14 @@
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 
+import { authenticatedAccountId } from "../../middleware/authenticate-api-key.js";
 import { AppError } from "../../shared/errors.js";
-import {
-  consumeBodySchema,
-  parseRequestBody
-} from "../../shared/validation.js";
-import {
-  parseConsumptionDecision,
-  type ConsumeRequest,
-  type ConsumptionDecision
-} from "./contract.js";
+import type { ConsumptionDecision } from "./contract.js";
 
 export interface ConsumptionRouteOperations {
   consume(
     accountId: string,
-    input: ConsumeRequest
+    input: unknown
   ): Promise<ConsumptionDecision | null>;
-}
-
-function authenticatedAccountId(request: FastifyRequest): string {
-  const account = request.authenticatedAccount;
-
-  if (account === null) {
-    throw new Error("Authenticated account context is missing.");
-  }
-
-  return account.id;
 }
 
 export function registerConsumptionRoutes(
@@ -34,14 +17,12 @@ export function registerConsumptionRoutes(
 ): void {
   app.post("/consume", async (request, reply) => {
     const accountId = authenticatedAccountId(request);
-    const input = parseRequestBody(consumeBodySchema, request.body);
-    const result = await operations.consume(accountId, input);
+    const result = await operations.consume(accountId, request.body);
 
     if (result === null) {
       throw new AppError("User not found.", 404, "USER_NOT_FOUND");
     }
 
-    const decision = parseConsumptionDecision(result);
-    return reply.status(200).send(decision);
+    return reply.status(200).send(result);
   });
 }

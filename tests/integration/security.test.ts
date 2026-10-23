@@ -5,10 +5,9 @@ import { Pool } from "pg";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
 import {
   createTwoAccountFixture,
   type TwoAccountFixture
@@ -37,16 +36,7 @@ let fixture: TwoAccountFixture;
 
 function createTestApp(): FastifyInstance {
   const app = buildApp({
-    checkDatabase: async () => {
-      await testPool.query("SELECT 1");
-    },
-    authenticateAccount: createApiKeyAuthenticator(testPool, testPepper),
-    userOperations: {
-      createUser: async (accountId, input) =>
-        createUser(testPool, accountId, input),
-      getUser: async (accountId, userId) =>
-        getUser(testPool, accountId, userId)
-    },
+    ...createAppOperations(testPool, testPepper),
     logger: false
   });
 

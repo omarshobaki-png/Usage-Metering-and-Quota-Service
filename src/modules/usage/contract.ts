@@ -6,12 +6,9 @@ import {
   planLimitSchema,
   requestIdSchema,
   unitsSchema,
+  usageMonthSchema,
   userIdSchema
 } from "../../shared/validation.js";
-
-export const usageMonthSchema = z
-  .string()
-  .regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 
 export const quotaScopeSchema = z.enum(["account", "user"]);
 

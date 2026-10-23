@@ -5,15 +5,11 @@ import { Pool } from "pg";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
 import { assignAccountPlan, assignUserPlan } from "../../src/modules/plans/assignment.js";
-import { createCustomPlan, getPlan, listPlans, updateCustomPlan } from "../../src/modules/plans/service.js";
-import { consume } from "../../src/modules/usage/consume.js";
-import { readHistory } from "../../src/modules/usage/history.js";
-import { readAccountRules, readAccountUsage, readUserRules, readUserUsage } from "../../src/modules/usage/queries.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
+import { createCustomPlan } from "../../src/modules/plans/service.js";
 import { createTwoAccountFixture, type TwoAccountFixture } from "../fixtures/two-account.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -66,32 +62,7 @@ beforeAll(async () => {
   await runMigrations(pool);
   await seedPredefinedPlans(pool);
   app = buildApp({
-    checkDatabase: async () => { await pool.query("SELECT 1"); },
-    authenticateAccount: createApiKeyAuthenticator(pool, pepper),
-    userOperations: {
-      createUser: async (id, input) => createUser(pool, id, input),
-      getUser: async (id, userId) => getUser(pool, id, userId)
-    },
-    planOperations: {
-      createCustomPlan: async (id, input) => createCustomPlan(pool, id, input),
-      getPlan: async (id, planId) => getPlan(pool, id, planId),
-      listPlans: async (id, scope) => listPlans(pool, id, scope),
-      updateCustomPlan: async (id, planId, input) => updateCustomPlan(pool, id, planId, input)
-    },
-    assignmentOperations: {
-      assignAccountPlan: async (id, planId) => assignAccountPlan(pool, id, planId),
-      assignUserPlan: async (id, userId, planId) => assignUserPlan(pool, id, userId, planId)
-    },
-    consumptionOperations: { consume: async (id, input) => consume(pool, id, input, { clock }) },
-    usageOperations: {
-      readAccountUsage: async (id, month) => readAccountUsage(pool, id, month, { clock }),
-      readUserUsage: async (id, userId, month) => readUserUsage(pool, id, userId, month, { clock })
-    },
-    ruleOperations: {
-      readAccountRules: async (id) => readAccountRules(pool, id, { clock }),
-      readUserRules: async (id, userId) => readUserRules(pool, id, userId, { clock })
-    },
-    historyOperations: { readHistory: async (id, query) => readHistory(pool, id, query) },
+    ...createAppOperations(pool, pepper, { clock }),
     logger: false
   });
   origin = await app.listen({ host: "127.0.0.1", port: 0 });

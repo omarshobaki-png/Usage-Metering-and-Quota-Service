@@ -5,14 +5,14 @@ import { Pool } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
 import { assignAccountPlan, assignUserPlan } from "../../src/modules/plans/assignment.js";
-import { createCustomPlan, getPlan, listPlans, updateCustomPlan } from "../../src/modules/plans/service.js";
-import { consume, type ConsumeOptions } from "../../src/modules/usage/consume.js";
+import { createCustomPlan, updateCustomPlan } from "../../src/modules/plans/service.js";
+import { type ConsumeOptions } from "../../src/modules/usage/consume.js";
 import { readAccountUsage, readUserUsage } from "../../src/modules/usage/queries.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
+import { createUser } from "../../src/modules/users/service.js";
 import { createTwoAccountFixture, type TwoAccountFixture } from "../fixtures/two-account.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -34,25 +34,7 @@ const clock = () => new Date(instant);
 
 function createTestApp(consumeOptions: ConsumeOptions = {}): FastifyInstance {
   const app = buildApp({
-    checkDatabase: async () => { await testPool.query("SELECT 1"); },
-    authenticateAccount: createApiKeyAuthenticator(testPool, pepper),
-    userOperations: {
-      createUser: async (accountId, input) => createUser(testPool, accountId, input),
-      getUser: async (accountId, userId) => getUser(testPool, accountId, userId)
-    },
-    planOperations: {
-      createCustomPlan: async (accountId, input) => createCustomPlan(testPool, accountId, input),
-      getPlan: async (accountId, planId) => getPlan(testPool, accountId, planId),
-      listPlans: async (accountId, scope) => listPlans(testPool, accountId, scope),
-      updateCustomPlan: async (accountId, planId, input) => updateCustomPlan(testPool, accountId, planId, input)
-    },
-    consumptionOperations: {
-      consume: async (accountId, input) => consume(testPool, accountId, input, { clock, ...consumeOptions })
-    },
-    usageOperations: {
-      readAccountUsage: async (accountId, month) => readAccountUsage(testPool, accountId, month, { clock }),
-      readUserUsage: async (accountId, userId, month) => readUserUsage(testPool, accountId, userId, month, { clock })
-    },
+    ...createAppOperations(testPool, pepper, { clock, ...consumeOptions }),
     logger: false
   });
   apps.push(app);

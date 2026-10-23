@@ -5,15 +5,13 @@ import { Pool } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
-import { assignAccountPlan, assignUserPlan } from "../../src/modules/plans/assignment.js";
-import { createCustomPlan, getPlan, listPlans, updateCustomPlan, type Plan } from "../../src/modules/plans/service.js";
-import { consume, type ConsumeOptions } from "../../src/modules/usage/consume.js";
+import { type Plan } from "../../src/modules/plans/service.js";
+import { type ConsumeOptions } from "../../src/modules/usage/consume.js";
 import { consumptionDecisionSchema, type ConsumptionDecision } from "../../src/modules/usage/contract.js";
 import type { ConsumptionSnapshot } from "../../src/modules/usage/snapshot.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
 import { MAX_QUANTITY } from "../../src/shared/validation.js";
 import { createTwoAccountFixture, type TwoAccountFixture } from "../fixtures/two-account.js";
 
@@ -35,27 +33,7 @@ let fixture: TwoAccountFixture;
 
 function createTestApp(options: ConsumeOptions = {}): FastifyInstance {
   const app = buildApp({
-    checkDatabase: async () => { await testPool.query("SELECT 1"); },
-    authenticateAccount: createApiKeyAuthenticator(testPool, testPepper),
-    userOperations: {
-      createUser: async (accountId, input) => createUser(testPool, accountId, input),
-      getUser: async (accountId, userId) => getUser(testPool, accountId, userId)
-    },
-    planOperations: {
-      createCustomPlan: async (accountId, input) => createCustomPlan(testPool, accountId, input),
-      listPlans: async (accountId, scope) => listPlans(testPool, accountId, scope),
-      getPlan: async (accountId, planId) => getPlan(testPool, accountId, planId),
-      updateCustomPlan: async (accountId, planId, input) => updateCustomPlan(testPool, accountId, planId, input)
-    },
-    assignmentOperations: {
-      assignAccountPlan: async (accountId, planId) => assignAccountPlan(testPool, accountId, planId),
-      assignUserPlan: async (accountId, userId, planId) => assignUserPlan(testPool, accountId, userId, planId)
-    },
-    consumptionOperations: {
-      consume: async (accountId, input) => consume(testPool, accountId, input, {
-        clock: () => new Date(instant), ...options
-      })
-    },
+    ...createAppOperations(testPool, testPepper, { clock: () => new Date(instant), ...options }),
     logger: false
   });
   apps.push(app);
@@ -354,6 +332,31 @@ describe("POST /consume with PostgreSQL", () => {
     expect(await getSavedDecision(input.requestId)).toEqual(before);
     expect(before.snapshot.evaluatedLimits.user.maxUnitsPerRequest).toBe(20);
     expect((await getSavedDecision("new-attempt")).snapshot.evaluatedLimits.user.maxUnitsPerRequest).toBe(30);
+  });
+
+  it("rejects a malformed stored snapshot without charging the retry", async () => {
+    const app = createTestApp();
+    const input = { userId: fixture.userA.id, units: 4, requestId: "malformed-snapshot" };
+    expect((await postConsume(app, input)).json().accepted).toBe(true);
+
+    await testPool.query(
+      "UPDATE request_decisions SET decision_snapshot = '{}'::jsonb WHERE account_id = $1 AND request_id = $2",
+      [fixture.accountA.id, input.requestId]
+    );
+    const saved = await getSavedDecision(input.requestId);
+    const response = await postConsume(app, input);
+
+    expect(response.statusCode).toBe(500);
+    expect(response.json()).toMatchObject({ error: { code: "INTERNAL_ERROR" } });
+    expect(response.json()).not.toHaveProperty("accepted");
+    expect(await getSavedDecision(input.requestId)).toEqual(saved);
+    const usage = await testPool.query(`
+      SELECT
+        (SELECT consumed_units FROM account_monthly_usage WHERE account_id = $1) AS account,
+        (SELECT consumed_units FROM user_monthly_usage WHERE user_id = $2) AS "user",
+        (SELECT count(*) FROM request_decisions WHERE account_id = $1) AS decisions
+    `, [fixture.accountA.id, fixture.userA.id]);
+    expect(usage.rows).toEqual([{ account: 4, user: 4, decisions: "1" }]);
   });
 
   it.each(["missing", "malformed", "unknown"])("rejects a %s API key without creating accounting rows", async (kind) => {

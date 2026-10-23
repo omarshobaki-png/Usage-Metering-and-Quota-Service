@@ -5,14 +5,14 @@ import { Pool } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
 import { assignUserPlan } from "../../src/modules/plans/assignment.js";
 import { updateCustomPlan } from "../../src/modules/plans/service.js";
-import { consume, type ConsumeOptions } from "../../src/modules/usage/consume.js";
+import { type ConsumeOptions } from "../../src/modules/usage/consume.js";
 import type { ConsumptionDecision } from "../../src/modules/usage/contract.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
+import { createUser } from "../../src/modules/users/service.js";
 import { createTwoAccountFixture, type TwoAccountFixture } from "../fixtures/two-account.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -34,17 +34,7 @@ function createTestApp(options: ConsumeOptions = {}): FastifyInstance {
   // Capture this pool: replacing the app and pool must not reuse process-local state.
   const pool = testPool;
   const app = buildApp({
-    checkDatabase: async () => { await pool.query("SELECT 1"); },
-    authenticateAccount: createApiKeyAuthenticator(pool, testPepper),
-    userOperations: {
-      createUser: async (accountId, input) => createUser(pool, accountId, input),
-      getUser: async (accountId, userId) => getUser(pool, accountId, userId)
-    },
-    consumptionOperations: {
-      consume: async (accountId, input) => consume(pool, accountId, input, {
-        clock: () => new Date(instant), ...options
-      })
-    },
+    ...createAppOperations(pool, testPepper, { clock: () => new Date(instant), ...options }),
     logger: false
   });
   apps.push(app);

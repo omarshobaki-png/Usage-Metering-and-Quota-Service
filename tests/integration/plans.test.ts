@@ -5,20 +5,15 @@ import { Pool } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { predefinedPlans, seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
 import {
   provisionAccount,
   type ProvisionedAccount
 } from "../../src/modules/accounts/provision-account.js";
-import {
-  createCustomPlan,
-  getPlan,
-  listPlans,
-  updateCustomPlan
-} from "../../src/modules/plans/service.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
+import { createCustomPlan, getPlan } from "../../src/modules/plans/service.js";
+import { createUser } from "../../src/modules/users/service.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
 
@@ -52,26 +47,7 @@ function predefinedPlanId(name: string): number {
 
 function createTestApp(): FastifyInstance {
   const app = buildApp({
-    checkDatabase: async () => {
-      await testPool.query("SELECT 1");
-    },
-    authenticateAccount: createApiKeyAuthenticator(testPool, testPepper),
-    userOperations: {
-      createUser: async (accountId, input) =>
-        createUser(testPool, accountId, input),
-      getUser: async (accountId, userId) =>
-        getUser(testPool, accountId, userId)
-    },
-    planOperations: {
-      createCustomPlan: async (accountId, input) =>
-        createCustomPlan(testPool, accountId, input),
-      listPlans: async (accountId, scope) =>
-        listPlans(testPool, accountId, scope),
-      getPlan: async (accountId, planId) =>
-        getPlan(testPool, accountId, planId),
-      updateCustomPlan: async (accountId, planId, input) =>
-        updateCustomPlan(testPool, accountId, planId, input)
-    },
+    ...createAppOperations(testPool, testPepper),
     logger: false
   });
 

@@ -17,13 +17,9 @@ import { runLoad } from "../../performance/load.js";
 import { reconcileLoad } from "../../performance/reconcile.js";
 import { loadResultSchema } from "../../performance/report.js";
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
-import { assignAccountPlan, assignUserPlan } from "../../src/modules/plans/assignment.js";
-import { createCustomPlan, getPlan, listPlans, updateCustomPlan } from "../../src/modules/plans/service.js";
-import { consume } from "../../src/modules/usage/consume.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
 if (databaseUrl === undefined) throw new Error("A PostgreSQL URL is required for load-runner integration tests.");
@@ -39,25 +35,7 @@ beforeAll(async () => {
   await runMigrations(pool);
   await seedPredefinedPlans(pool);
   app = buildApp({
-    checkDatabase: async () => { await pool.query("SELECT 1"); },
-    authenticateAccount: createApiKeyAuthenticator(pool, pepper),
-    userOperations: {
-      createUser: async (id, input) => createUser(pool, id, input),
-      getUser: async (id, userId) => getUser(pool, id, userId)
-    },
-    planOperations: {
-      createCustomPlan: async (id, input) => createCustomPlan(pool, id, input),
-      getPlan: async (id, planId) => getPlan(pool, id, planId),
-      listPlans: async (id, scope) => listPlans(pool, id, scope),
-      updateCustomPlan: async (id, planId, input) => updateCustomPlan(pool, id, planId, input)
-    },
-    assignmentOperations: {
-      assignAccountPlan: async (id, planId) => assignAccountPlan(pool, id, planId),
-      assignUserPlan: async (id, userId, planId) => assignUserPlan(pool, id, userId, planId)
-    },
-    consumptionOperations: { consume: async (id, input) => consume(pool, id, input, {
-      clock: () => new Date("2026-10-18T08:00:00.000Z")
-    }) },
+    ...createAppOperations(pool, pepper, { clock: () => new Date("2026-10-18T08:00:00.000Z") }),
     logger: false
   });
   origin = await app.listen({ host: "127.0.0.1", port: 0 });

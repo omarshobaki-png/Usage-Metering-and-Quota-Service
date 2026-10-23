@@ -5,14 +5,13 @@ import { Pool } from "pg";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
 import { assignAccountPlan, assignUserPlan } from "../../src/modules/plans/assignment.js";
 import { createCustomPlan } from "../../src/modules/plans/service.js";
-import { consume } from "../../src/modules/usage/consume.js";
 import { consumptionDecisionSchema, type ConsumeRequest, type ConsumptionDecision } from "../../src/modules/usage/contract.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
+import { createUser } from "../../src/modules/users/service.js";
 import { createTwoAccountFixture, type TwoAccountFixture } from "../fixtures/two-account.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
@@ -41,17 +40,7 @@ let fixture: TwoAccountFixture;
 
 function createTestApp(): FastifyInstance {
   const app = buildApp({
-    checkDatabase: async () => { await testPool.query("SELECT 1"); },
-    authenticateAccount: createApiKeyAuthenticator(testPool, testPepper),
-    userOperations: {
-      createUser: async (accountId, input) => createUser(testPool, accountId, input),
-      getUser: async (accountId, userId) => getUser(testPool, accountId, userId)
-    },
-    consumptionOperations: {
-      consume: async (accountId, input) => consume(testPool, accountId, input, {
-        clock: () => new Date(instant)
-      })
-    },
+    ...createAppOperations(testPool, testPepper, { clock: () => new Date(instant) }),
     logger: false
   });
   apps.push(app);

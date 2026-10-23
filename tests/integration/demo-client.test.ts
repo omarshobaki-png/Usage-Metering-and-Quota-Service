@@ -8,14 +8,9 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { runDemoScenario } from "../../demo/client.js";
 import { createDemoFixture } from "../../demo/setup.js";
 import { buildApp } from "../../src/app.js";
+import { createAppOperations } from "../../src/app-operations.js";
 import { runMigrations } from "../../src/db/migrate.js";
 import { seedPredefinedPlans } from "../../src/db/seed.js";
-import { createApiKeyAuthenticator } from "../../src/middleware/authenticate-api-key.js";
-import { assignAccountPlan, assignUserPlan } from "../../src/modules/plans/assignment.js";
-import { createCustomPlan, getPlan, listPlans, updateCustomPlan } from "../../src/modules/plans/service.js";
-import { consume } from "../../src/modules/usage/consume.js";
-import { readAccountUsage, readUserUsage } from "../../src/modules/usage/queries.js";
-import { createUser, getUser } from "../../src/modules/users/service.js";
 
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL;
 if (databaseUrl === undefined) {
@@ -37,35 +32,7 @@ let serviceUrl: string;
 
 function createDemoApp(): FastifyInstance {
   return buildApp({
-    checkDatabase: async () => {
-      await pool.query("SELECT 1");
-    },
-    authenticateAccount: createApiKeyAuthenticator(pool, pepper),
-    userOperations: {
-      createUser: async (accountId, input) => createUser(pool, accountId, input),
-      getUser: async (accountId, userId) => getUser(pool, accountId, userId)
-    },
-    planOperations: {
-      createCustomPlan: async (accountId, input) => createCustomPlan(pool, accountId, input),
-      listPlans: async (accountId, scope) => listPlans(pool, accountId, scope),
-      getPlan: async (accountId, planId) => getPlan(pool, accountId, planId),
-      updateCustomPlan: async (accountId, planId, input) =>
-        updateCustomPlan(pool, accountId, planId, input)
-    },
-    assignmentOperations: {
-      assignAccountPlan: async (accountId, planId) => assignAccountPlan(pool, accountId, planId),
-      assignUserPlan: async (accountId, userId, planId) =>
-        assignUserPlan(pool, accountId, userId, planId)
-    },
-    consumptionOperations: {
-      consume: async (accountId, input) => consume(pool, accountId, input, { clock })
-    },
-    usageOperations: {
-      readAccountUsage: async (accountId, month) =>
-        readAccountUsage(pool, accountId, month, { clock }),
-      readUserUsage: async (accountId, userId, month) =>
-        readUserUsage(pool, accountId, userId, month, { clock })
-    },
+    ...createAppOperations(pool, pepper, { clock }),
     logger: false
   });
 }
