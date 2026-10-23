@@ -1,5 +1,6 @@
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 
+import { authenticatedAccountId } from "../../middleware/authenticate-api-key.js";
 import {
   AppError,
   InvalidRequestError,
@@ -30,16 +31,6 @@ export interface PlanRouteOperations {
     planId: number,
     input: UpdateCustomPlanBody
   ): Promise<Plan>;
-}
-
-function authenticatedAccountId(request: FastifyRequest): string {
-  const account = request.authenticatedAccount;
-
-  if (account === null) {
-    throw new Error("Authenticated account context is missing.");
-  }
-
-  return account.id;
 }
 
 function parsePlanId(value: string): number {

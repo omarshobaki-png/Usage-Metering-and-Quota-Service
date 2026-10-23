@@ -1,5 +1,6 @@
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 
+import { authenticatedAccountId } from "../../middleware/authenticate-api-key.js";
 import { AppError } from "../../shared/errors.js";
 import {
   createUserBodySchema,
@@ -12,16 +13,6 @@ import type { CreateUserInput, User } from "./service.js";
 export interface UserRouteOperations {
   createUser(accountId: string, input: CreateUserInput): Promise<User>;
   getUser(accountId: string, userId: string): Promise<User | null>;
-}
-
-function authenticatedAccountId(request: FastifyRequest): string {
-  const account = request.authenticatedAccount;
-
-  if (account === null) {
-    throw new Error("Authenticated account context is missing.");
-  }
-
-  return account.id;
 }
 
 function parseCreateUserInput(body: unknown): CreateUserInput {

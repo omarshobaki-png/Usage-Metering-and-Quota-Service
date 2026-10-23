@@ -3,7 +3,7 @@ import type { Pool } from "pg";
 import type { Clock } from "../../shared/clock.js";
 import { InvalidRequestError } from "../../shared/errors.js";
 import { usageMonthSchema } from "../../shared/validation.js";
-import type { AssignedAccount } from "../plans/assignment.js";
+import type { PlanSummary } from "../plans/types.js";
 
 export type UsageBalance =
   | { id: string; consumed: number }
@@ -25,7 +25,7 @@ export interface UsageQueryOptions {
 
 export interface AppliedRules {
   id: string;
-  plan: AssignedAccount["plan"];
+  plan: PlanSummary;
   consumed: number;
   remaining: number;
 }
@@ -44,10 +44,10 @@ interface UsageRow {
   isCurrentMonth: boolean;
   accountId: string;
   accountConsumed: number;
-  accountPlan: AssignedAccount["plan"];
+  accountPlan: PlanSummary;
   userId: string | null;
   userConsumed: number;
-  userPlan: AssignedAccount["plan"] | null;
+  userPlan: PlanSummary | null;
 }
 
 async function readUsage(
@@ -146,7 +146,7 @@ export async function readUserUsage(
   };
 }
 
-function appliedRules(id: string, consumed: number, plan: AssignedAccount["plan"]): AppliedRules {
+function appliedRules(id: string, consumed: number, plan: PlanSummary): AppliedRules {
   return { id, plan, consumed, remaining: Math.max(0, plan.monthlyLimit - consumed) };
 }
 

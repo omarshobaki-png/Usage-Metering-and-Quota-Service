@@ -2,17 +2,12 @@ import type { Pool, PoolClient } from "pg";
 
 import { withLockedAccountTransaction } from "../../db/account-transaction.js";
 import type { User } from "../users/service.js";
+import type { PlanSummary } from "./types.js";
 
 export type AssignmentScope = "account" | "user";
 
-export interface AssignablePlan {
-  id: number;
-  name: string;
-  scope: AssignmentScope;
+export interface AssignablePlan extends PlanSummary {
   ownerAccountId: string | null;
-  monthlyLimit: number;
-  maxUnitsPerRequest: number;
-  revision: number;
 }
 
 export type PlanAssignmentErrorCode =
@@ -40,14 +35,7 @@ export class AssignmentUserNotFoundError extends Error {
 export interface AssignedAccount {
   id: string;
   name: string;
-  plan: {
-    id: number;
-    name: string;
-    scope: AssignmentScope;
-    monthlyLimit: number;
-    maxUnitsPerRequest: number;
-    revision: number;
-  };
+  plan: PlanSummary;
 }
 
 interface ValidatePlanAssignmentInput {
@@ -127,7 +115,7 @@ export async function validatePlanAssignment(
   return plan;
 }
 
-function planSummary(plan: AssignablePlan): AssignedAccount["plan"] {
+function planSummary(plan: AssignablePlan): PlanSummary {
   return {
     id: plan.id,
     name: plan.name,

@@ -1,5 +1,6 @@
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 
+import { authenticatedAccountId } from "../../middleware/authenticate-api-key.js";
 import { AppError, InvalidRequestError } from "../../shared/errors.js";
 import { usageQuerySchema, userIdSchema } from "../../shared/validation.js";
 import type { AccountUsage, UserUsage } from "./queries.js";
@@ -7,13 +8,6 @@ import type { AccountUsage, UserUsage } from "./queries.js";
 export interface UsageRouteOperations {
   readAccountUsage(accountId: string, month?: string): Promise<AccountUsage | null>;
   readUserUsage(accountId: string, userId: string, month?: string): Promise<UserUsage | null>;
-}
-
-function authenticatedAccountId(request: FastifyRequest): string {
-  if (request.authenticatedAccount === null) {
-    throw new Error("Authenticated account context is missing.");
-  }
-  return request.authenticatedAccount.id;
 }
 
 function selectedMonth(query: unknown): string | undefined {

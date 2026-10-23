@@ -4,6 +4,7 @@ import type { Pool } from "pg";
 
 import { withLockedAccountTransaction } from "../../db/account-transaction.js";
 import { validatePlanAssignment } from "../plans/assignment.js";
+import type { PlanSummary } from "../plans/types.js";
 
 const DEFAULT_USER_PLAN_NAME = "Basic";
 
@@ -11,20 +12,11 @@ export interface CreateUserInput {
   planId?: number;
 }
 
-export interface UserPlanSummary {
-  id: number;
-  name: string;
-  scope: "account" | "user";
-  monthlyLimit: number;
-  maxUnitsPerRequest: number;
-  revision: number;
-}
-
 export interface User {
   id: string;
   accountId: string;
   createdAt: Date;
-  plan: UserPlanSummary;
+  plan: PlanSummary;
 }
 
 interface UserRow {

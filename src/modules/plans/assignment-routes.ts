@@ -1,5 +1,6 @@
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 
+import { authenticatedAccountId } from "../../middleware/authenticate-api-key.js";
 import { AppError } from "../../shared/errors.js";
 import {
   parseRequestBody,
@@ -20,16 +21,6 @@ export interface AssignmentRouteOperations {
     userId: string,
     planId: number
   ): Promise<User>;
-}
-
-function authenticatedAccountId(request: FastifyRequest): string {
-  const account = request.authenticatedAccount;
-
-  if (account === null) {
-    throw new Error("Authenticated account context is missing.");
-  }
-
-  return account.id;
 }
 
 function mapPlanAssignmentError(error: PlanAssignmentError): AppError {

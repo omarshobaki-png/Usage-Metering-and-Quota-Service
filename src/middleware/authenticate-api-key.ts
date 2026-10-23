@@ -3,6 +3,7 @@ import type { Pool } from "pg";
 
 import { AppError } from "../shared/errors.js";
 import { digestApiKey } from "../modules/accounts/api-key.js";
+import type { PlanSummary } from "../modules/plans/types.js";
 
 export const API_KEY_HEADER = "x-api-key";
 const API_KEY_PATTERN = /^umq_[A-Za-z0-9_-]{43}$/;
@@ -10,14 +11,7 @@ const API_KEY_PATTERN = /^umq_[A-Za-z0-9_-]{43}$/;
 export interface AuthenticatedAccount {
   id: string;
   name: string;
-  plan: {
-    id: number;
-    name: string;
-    scope: "account" | "user";
-    monthlyLimit: number;
-    maxUnitsPerRequest: number;
-    revision: number;
-  };
+  plan: PlanSummary;
 }
 
 interface AuthenticatedAccountRow {
@@ -39,6 +33,16 @@ declare module "fastify" {
   interface FastifyRequest {
     authenticatedAccount: AuthenticatedAccount | null;
   }
+}
+
+export function authenticatedAccountId(request: FastifyRequest): string {
+  const account = request.authenticatedAccount;
+
+  if (account === null) {
+    throw new Error("Authenticated account context is missing.");
+  }
+
+  return account.id;
 }
 
 export function createApiKeyAuthenticator(
