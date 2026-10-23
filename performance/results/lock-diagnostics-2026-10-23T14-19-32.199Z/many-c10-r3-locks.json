@@ -1,0 +1,499 @@
+{
+  "schemaVersion": 1,
+  "runId": "d8e2b5ce-5dfb-434c-a0a1-98f88300ace8",
+  "rawRun": "many-c10-r3.json",
+  "minimumIntervalMs": 25,
+  "summary": {
+    "sampleCount": 60,
+    "samplesWithAccountLockWait": 0,
+    "fractionWithAccountLockWait": 0,
+    "meanBackends": 10,
+    "meanActive": 2.5,
+    "meanLockWaiting": 0,
+    "meanAccountLockWaiting": 0,
+    "peakAccountLockWaiting": 0,
+    "lockEventObservations": {}
+  },
+  "samples": [
+    {
+      "backends": 10,
+      "active": 1,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1.586353999999119
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 28.012995000000956
+    },
+    {
+      "backends": 10,
+      "active": 5,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 54.206914999998844
+    },
+    {
+      "backends": 10,
+      "active": 0,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 79.94471699999849
+    },
+    {
+      "backends": 10,
+      "active": 5,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 106.05054200000086
+    },
+    {
+      "backends": 10,
+      "active": 4,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 131.45790299999862
+    },
+    {
+      "backends": 10,
+      "active": 1,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 158.07376600000134
+    },
+    {
+      "backends": 10,
+      "active": 6,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 184.28757100000075
+    },
+    {
+      "backends": 10,
+      "active": 4,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 209.69835899999816
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 237.30251599999974
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 263.19847599999775
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 288.7205150000009
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 315.0262279999988
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 340.53796599999987
+    },
+    {
+      "backends": 10,
+      "active": 1,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 367.01631799999814
+    },
+    {
+      "backends": 10,
+      "active": 1,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 392.7293529999988
+    },
+    {
+      "backends": 10,
+      "active": 1,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 418.72850800000015
+    },
+    {
+      "backends": 10,
+      "active": 0,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 445.54993399999876
+    },
+    {
+      "backends": 10,
+      "active": 1,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 472.7705089999981
+    },
+    {
+      "backends": 10,
+      "active": 0,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 498.7624680000008
+    },
+    {
+      "backends": 10,
+      "active": 1,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 524.7257419999987
+    },
+    {
+      "backends": 10,
+      "active": 4,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 551.8881039999978
+    },
+    {
+      "backends": 10,
+      "active": 4,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 578.3360069999981
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 604.6461840000011
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 631.2935109999999
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 657.2359159999978
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 683.9840650000006
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 711.6179530000009
+    },
+    {
+      "backends": 10,
+      "active": 4,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 738.9693939999961
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 765.2399419999965
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 790.9938539999966
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 817.3109860000004
+    },
+    {
+      "backends": 10,
+      "active": 5,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 843.4608019999978
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 870.0838429999967
+    },
+    {
+      "backends": 10,
+      "active": 4,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 896.8583340000005
+    },
+    {
+      "backends": 10,
+      "active": 0,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 922.9245300000002
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 948.4842469999967
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 975.799372999998
+    },
+    {
+      "backends": 10,
+      "active": 0,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1002.1074800000024
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1028.117967000002
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1054.1272480000007
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1079.628010999997
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1105.943593
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1132.883294000003
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1160.0673399999978
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1186.2645900000025
+    },
+    {
+      "backends": 10,
+      "active": 0,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1211.5693720000017
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1237.4100080000026
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1263.276931999997
+    },
+    {
+      "backends": 10,
+      "active": 3,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1288.554417999996
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1314.804963999999
+    },
+    {
+      "backends": 10,
+      "active": 4,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1340.5535469999995
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1367.0123060000005
+    },
+    {
+      "backends": 10,
+      "active": 0,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1393.183353999997
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1419.2284120000004
+    },
+    {
+      "backends": 10,
+      "active": 5,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1445.2409589999988
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1471.183194000001
+    },
+    {
+      "backends": 10,
+      "active": 0,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1497.8254039999993
+    },
+    {
+      "backends": 10,
+      "active": 6,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1526.402398000002
+    },
+    {
+      "backends": 10,
+      "active": 2,
+      "lockWaiting": 0,
+      "accountLockWaiting": 0,
+      "lockEvents": {},
+      "elapsedMs": 1552.2171839999974
+    }
+  ]
+}

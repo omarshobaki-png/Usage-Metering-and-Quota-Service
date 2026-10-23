@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 1,
+  "runId": "41fb1bf3-bdde-467d-b9dd-c121ef8450b4",
+  "startedAt": "2026-10-23T14:17:30.234Z",
+  "finishedAt": "2026-10-23T14:17:31.307Z",
+  "settings": {
+    "workload": "throughput",
+    "baseUrl": "http://127.0.0.1:32796",
+    "accounts": 10,
+    "usersPerAccount": 2,
+    "concurrency": 10,
+    "requests": 500,
+    "timeoutMs": 10000,
+    "units": 1,
+    "accountMonthlyLimit": 4000,
+    "userMonthlyLimit": 4000,
+    "requestLimit": 500,
+    "distribution": "round-robin accounts and users",
+    "workloadModel": "closed-loop bounded workers"
+  },
+  "versions": {
+    "runner": "1.0.0",
+    "node": "v22.22.1",
+    "undici": null,
+    "application": "0.1.0",
+    "postgres": "17.6 (Debian 17.6-2.pgdg12+1)"
+  },
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "osRelease": "6.18.33.2-microsoft-standard-WSL2",
+    "logicalCpus": 16,
+    "cpuModel": "13th Gen Intel(R) Core(TM) i7-13620H",
+    "memoryBytes": 8130293760
+  },
+  "source": {
+    "commit": "5038fa7eca1a14371161681d27bbfcb7f82c34a2",
+    "dirty": true
+  },
+  "status": "passed",
+  "measurements": {
+    "attempted": 500,
+    "completed": 500,
+    "maxInFlight": 10,
+    "elapsedMs": 763.6012570000001,
+    "completedPerSecond": 654.7920074992751,
+    "acceptedPerSecond": 654.7920074992751,
+    "latencyMs": {
+      "sampleCount": 500,
+      "p50": 14.406341999999995,
+      "p95": 24.253127999999947,
+      "p99": 30.180826000000025
+    },
+    "counts": {
+      "accepted": 500,
+      "quotaRejected": 0,
+      "unexpectedHttpStatus": 0,
+      "timeout": 0,
+      "networkError": 0,
+      "invalidResponse": 0
+    },
+    "httpStatuses": {
+      "200": 500
+    },
+    "retries": 0,
+    "latencyScope": "One HTTP attempt including response body; excludes queue wait, fixture setup and reconciliation. Includes failed attempts. No retries or redirects."
+  },
+  "verification": {
+    "passed": true,
+    "errors": [],
+    "accountConsumed": 500,
+    "sumUserConsumed": 500,
+    "uniqueAcceptedDecisionUnits": 500,
+    "acceptedDecisions": 500,
+    "rejectedDecisions": 0,
+    "accounts": [
+      {
+        "accountId": "65a93d02-a0b6-4e74-a4d4-fad87e2c5f6e",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "e60e9c86-0320-4eec-a50d-e6b973b372c5",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "6c431ca6-84d7-4685-8f87-ecc6642c14f3",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "e823de93-6af5-4d83-8575-e67ee1dbd28a",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "77d081e0-f435-4ef5-90de-10fa49533721",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "e80338c6-44c3-4168-ba0c-3b33ad7c6115",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "9c95f963-8337-40b9-951a-2088bf80607b",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "1dced381-fb78-4329-ae90-bcd916d84eab",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "33f84b7e-b8f1-4ec1-8810-1a3be94ff420",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "f3be465d-3d37-4803-92e5-1e5713e4cb20",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "7728215b-20dc-4c3a-b90d-0e0abe6f95bf",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "37330cdb-95b6-43b7-bd53-b3d191501e6d",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "19a269a2-6313-4105-8636-e3abed5596b0",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "fd220f8c-c1e4-4c1d-afef-776cdf0034dd",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "b392192c-60e3-4bfa-a8ab-0398ec765ffa",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "c2cb1ce1-3961-4775-a682-45d5769a0d46",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "aa5997c5-4536-4d98-82b7-3ee6b7873937",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "a66680ca-54d5-4e3a-a3ba-ec4666b43b93",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "56f9fc92-dcea-4c36-bd8c-6fb74c902356",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "def4564f-3dbe-4fd4-8c6a-cd9edb5290f2",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "f418b0cc-dd1c-4454-a670-63fde6cdb386",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "05757806-7344-469b-896c-215e180f5a6d",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "8508b45b-098b-429b-8c74-c3acc0afd598",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "2c73ec16-af96-4927-b6b3-7340e85d812b",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "65e52623-b75f-466f-8640-4efd7aee2b5e",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "df8c31e9-2843-4659-aada-39d3468c4cda",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "7e18744f-b737-4b5d-b246-41df9e67833b",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      },
+      {
+        "accountId": "e41a4a65-a8cf-44cd-8751-d820ce239e1f",
+        "months": [
+          "2026-10"
+        ],
+        "monthlyLimit": 4000,
+        "accountConsumed": 50,
+        "sumUserConsumed": 50,
+        "uniqueAcceptedDecisionUnits": 50,
+        "decisionCount": 50,
+        "uniqueDecisionCount": 50,
+        "users": [
+          {
+            "userId": "4c936056-cacd-4ea1-8115-77addf2caa2c",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          },
+          {
+            "userId": "e0a821aa-1e21-4b8c-b62d-94f2b92886d2",
+            "consumed": 25,
+            "monthlyLimit": 4000,
+            "acceptedDecisionUnits": 25
+          }
+        ]
+      }
+    ]
+  },
+  "failure": null
+}

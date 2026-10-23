@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-10-23T14:17:20.087Z",
+  "project": "quota-compare-d74f0ff8-ff39-4ad2-89c3-769959aac0b0",
+  "source": {
+    "commit": "5038fa7eca1a14371161681d27bbfcb7f82c34a2",
+    "dirty": false
+  },
+  "composeVersion": "5.5.1",
+  "docker": {
+    "version": "29.8.2",
+    "operatingSystem": "Docker Desktop",
+    "kernel": "6.18.33.2-microsoft-standard-WSL2",
+    "architecture": "x86_64",
+    "cpus": 16,
+    "memoryBytes": 8130293760
+  },
+  "containers": [
+    {
+      "service": "api",
+      "image": "quota-compare-d74f0ff8-ff39-4ad2-89c3-769959aac0b0-api",
+      "imageId": "sha256:e7cd812d9f2c458f258e0124c0dba08d210eca0f8838b42fb59152150233349d",
+      "resources": {
+        "nanoCpus": 0,
+        "memoryBytes": 0,
+        "cpuQuota": 0,
+        "cpuPeriod": 0,
+        "cpusetCpus": ""
+      }
+    },
+    {
+      "service": "db",
+      "image": "postgres:17.6-bookworm",
+      "imageId": "sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3",
+      "resources": {
+        "nanoCpus": 0,
+        "memoryBytes": 0,
+        "cpuQuota": 0,
+        "cpuPeriod": 0,
+        "cpusetCpus": ""
+      }
+    }
+  ],
+  "postgres": {
+    "version": "PostgreSQL 17.6 (Debian 17.6-2.pgdg12+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+    "max_connections": "100",
+    "shared_buffers": "128MB",
+    "fsync": "on",
+    "synchronous_commit": "on"
+  },
+  "apiRuntime": {
+    "node": "v22.22.1",
+    "pg": "8.23.1",
+    "poolMax": 10,
+    "processCount": 1,
+    "entrypoint": "node dist/src/server.js"
+  },
+  "clientAndServerShareMachine": true,
+  "developmentStackAlsoRunning": true,
+  "settings": {
+    "requests": 2000,
+    "monthlyLimit": 4000,
+    "totalUsers": 20,
+    "repetitions": 3
+  },
+  "concurrency": [
+    1,
+    10,
+    50
+  ],
+  "warmups": {
+    "requestsPerShape": 500,
+    "concurrency": 10,
+    "separateFreshFixtures": true
+  },
+  "notes": [
+    "No CPU/memory limits in test Compose; zero resource values mean no explicit container cap.",
+    "API and DB share Docker Desktop/WSL resources with the host-side generator and idle development stack.",
+    "No lock-wait or pool-wait instrumentation; bottleneck explanations are inferences, not measured wait times."
+  ]
+}

@@ -1,7 +1,7 @@
 # Performance report
 
-The saved comparison observed about **293 accepted requests/sec for one busy
-account** and **1,016 across ten accounts** at concurrency 10. All 36,000 measured
+The October 23 comparison observed about **300 accepted requests/sec for one busy
+account** and **1,067 across ten accounts** at concurrency 10. All 36,000 measured
 actions reconciled. Separate diagnostics observed substantial account-lock
 contention for the busy account. These are local measurements, not an SLA.
 
@@ -27,12 +27,14 @@ Both build the current API and create unique projects from
 ports and fresh volumes. They do not load the host `.env` or use development data.
 Keys are generated at runtime and kept in memory.
 
-The captured invocations selected these evidence directories:
+The October 23 runs used the commands above with their default timestamped paths:
 
-```bash
-npm run perf:compare -- --output-dir performance/results/account-comparison
-npm run perf:diagnose -- --output-dir performance/results/lock-diagnostics
-```
+- Comparison: `performance/results/account-comparison-2026-10-23T14-17-20.087Z/`
+- Diagnostics: `performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/`
+
+The completed October 18 [comparison](../performance/results/account-comparison/summary.json)
+and [diagnostics](../performance/results/lock-diagnostics/summary.json) remain as
+historical evidence. The tables below use only the completed October 23 runs.
 
 When repeating, omit `--output-dir` for a unique timestamped directory or choose
 a new path. Existing directories are refused. Successful runs verify resource
@@ -43,8 +45,8 @@ Manual interruption may leave the printed test project for targeted cleanup.
 ## Environment
 
 Captured runtime, machine, image, source, and database details are in the
-[comparison environment](../performance/results/account-comparison/environment.json)
-and [diagnostic environment](../performance/results/lock-diagnostics/environment.json).
+[comparison environment](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/environment.json)
+and [diagnostic environment](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/environment.json).
 The two experiments used separate freshly built stacks on the same machine.
 
 | Setting | Captured value |
@@ -59,15 +61,17 @@ The two experiments used separate freshly built stacks on the same machine.
 | DB settings | max_connections=100; shared_buffers=128MB; fsync=on; synchronous_commit=on |
 | Resource isolation | No explicit per-container CPU/memory caps; client, API and DB share this machine |
 | Other load | Normal development API/DB remained running; other host activity was not controlled |
-| Source | HEAD `36cd2520936fa9b2dc8a25fbd09c2e23541a1bef`, **dirty=true**; includes uncommitted implementation and verification work, not a claim that HEAD alone contains this runner |
+| Source | HEAD `5038fa7eca1a14371161681d27bbfcb7f82c34a2`; no implementation changes between verification, comparison, and diagnostics |
 
-The source fields describe the dirty workspace used for each measurement;
-HEAD alone does not identify all uncommitted content. No real key, digest,
-private pepper, or connection URL is included in published result JSON.
+The verification gate and comparison started from the clean commit above.
+The comparison environment records `dirty=false`; its raw loads and the later
+diagnostics record `dirty=true` because generated evidence was then untracked.
+Before documentation edits, Git status showed only the two new result folders.
+No real key, digest, private pepper, or connection URL is included in published JSON.
 
 ## Account comparison
 
-Captured October 18, 2026, **10:40:42.951–10:43:02.419 UTC**, including build,
+Captured October 23, 2026, **14:17:20.087–14:19:20.779 UTC**, including build,
 fixture setup, and warmups. Each raw file records its own measured duration.
 
 ### Method
@@ -95,43 +99,44 @@ Account usage, sum of user usage, and unique accepted ledger units were all 2,00
 
 Values are medians of three run-level values; parentheses show min–max.
 Percentiles are not pooled, so median latency columns may come from different runs.
-The [summary](../performance/results/account-comparison/summary.json) retains
+The [summary](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/summary.json) retains
 full precision and the supporting filenames.
 
 | Shape | Workers | Requests/sec (range) | Load duration ms | p50 ms | p95 ms (range) | p99 ms |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 account / 20 users | 1 | 228.07 (208.33–234.73) | 8769.40 | 4.11 | 5.89 (5.47–6.73) | 8.23 |
-| 1 account / 20 users | 10 | 292.65 (272.42–297.76) | 6834.18 | 32.57 | 42.92 (40.51–48.32) | 50.59 |
-| 1 account / 20 users | 50 | 263.26 (237.46–267.88) | 7597.11 | 190.89 | 228.75 (222.89–264.37) | 240.93 |
-| 10 accounts / 2 users each | 1 | 221.68 (209.51–234.15) | 9022.13 | 4.16 | 6.63 (5.86–7.54) | 8.50 |
-| 10 accounts / 2 users each | 10 | 1015.57 (1003.93–1127.47) | 1969.33 | 9.36 | 14.15 (11.77–14.21) | 17.36 |
-| 10 accounts / 2 users each | 50 | 1053.60 (920.77–1123.62) | 1898.25 | 46.01 | 56.55 (54.27–71.00) | 75.86 |
+| 1 account / 20 users | 1 | 231.06 (227.38–241.63) | 8655.82 | 4.08 | 6.15 (5.59–6.21) | 7.53 |
+| 1 account / 20 users | 10 | 299.57 (279.42–344.41) | 6676.32 | 31.14 | 44.61 (34.21–49.66) | 50.02 |
+| 1 account / 20 users | 50 | 333.97 (313.43–348.03) | 5988.53 | 143.72 | 176.50 (160.66–189.06) | 186.09 |
+| 10 accounts / 2 users each | 1 | 243.88 (219.38–266.94) | 8200.64 | 3.83 | 5.61 (5.14–6.98) | 7.63 |
+| 10 accounts / 2 users each | 10 | 1066.72 (790.16–1176.84) | 1874.91 | 9.12 | 12.63 (11.45–21.48) | 16.14 |
+| 10 accounts / 2 users each | 50 | 1176.27 (1111.66–1186.82) | 1700.29 | 40.95 | 50.17 (48.56–58.06) | 56.83 |
 
 ### Raw measurements
 
 | Shape / workers | Repetition 1 | Repetition 2 | Repetition 3 |
 | --- | --- | --- | --- |
-| Hot / 1 | [raw](../performance/results/account-comparison/hot-c1-r1.json) | [raw](../performance/results/account-comparison/hot-c1-r2.json) | [raw](../performance/results/account-comparison/hot-c1-r3.json) |
-| Hot / 10 | [raw](../performance/results/account-comparison/hot-c10-r1.json) | [raw](../performance/results/account-comparison/hot-c10-r2.json) | [raw](../performance/results/account-comparison/hot-c10-r3.json) |
-| Hot / 50 | [raw](../performance/results/account-comparison/hot-c50-r1.json) | [raw](../performance/results/account-comparison/hot-c50-r2.json) | [raw](../performance/results/account-comparison/hot-c50-r3.json) |
-| Many / 1 | [raw](../performance/results/account-comparison/many-c1-r1.json) | [raw](../performance/results/account-comparison/many-c1-r2.json) | [raw](../performance/results/account-comparison/many-c1-r3.json) |
-| Many / 10 | [raw](../performance/results/account-comparison/many-c10-r1.json) | [raw](../performance/results/account-comparison/many-c10-r2.json) | [raw](../performance/results/account-comparison/many-c10-r3.json) |
-| Many / 50 | [raw](../performance/results/account-comparison/many-c50-r1.json) | [raw](../performance/results/account-comparison/many-c50-r2.json) | [raw](../performance/results/account-comparison/many-c50-r3.json) |
+| Hot / 1 | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c1-r1.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c1-r2.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c1-r3.json) |
+| Hot / 10 | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c10-r1.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c10-r2.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c10-r3.json) |
+| Hot / 50 | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c50-r1.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c50-r2.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/hot-c50-r3.json) |
+| Many / 1 | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c1-r1.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c1-r2.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c1-r3.json) |
+| Many / 10 | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c10-r1.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c10-r2.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c10-r3.json) |
+| Many / 50 | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c50-r1.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c50-r2.json) | [raw](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/many-c50-r3.json) |
 
-Excluded warmups: [hot](../performance/results/account-comparison/warmup-hot.json)
-and [many](../performance/results/account-comparison/warmup-many.json).
+Excluded warmups: [hot](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/warmup-hot.json)
+and [many](../performance/results/account-comparison-2026-10-23T14-17-20.087Z/warmup-many.json).
 Each accepted 500 actions and reconciled 500 account/user/ledger units.
 
 ### Findings
 
 At one worker, throughput ranges overlap because requests have little opportunity
-to execute in parallel. At ten workers, ten independent accounts have **3.47×**
-the hot account's median throughput and lower p95 latency: 14.15 versus 42.92 ms.
+to execute in parallel. At ten workers, ten independent accounts have **3.56×**
+the hot account's median throughput and lower p95 latency: 12.63 versus 44.61 ms.
 
-For one account, increasing workers from 10 to 50 reduced median throughput from
-292.65 to 263.26 requests/sec while p95 rose from 42.92 to 228.75 ms.
-For ten accounts, the same increase improved median throughput by about 3.7%,
-with overlapping ranges, while p95 rose from 14.15 to 56.55 ms.
+For one account, increasing workers from 10 to 50 raised median throughput from
+299.57 to 333.97 requests/sec (about 11.5%), with overlapping ranges,
+while p95 rose from 44.61 to 176.50 ms.
+For ten accounts, the same increase improved median throughput by about 10.3%,
+also with overlapping ranges, while p95 rose from 12.63 to 50.17 ms.
 
 The implementation holds the account row lock through commit, so users sharing an
 account serialize mutations. Independent accounts can overlap transactions.
@@ -141,7 +146,7 @@ The uninstrumented comparison does not isolate their individual costs.
 
 ## Lock diagnostics
 
-Captured October 18, 2026, **12:43:11.818–12:43:56.118 UTC**, including setup.
+Captured October 23, 2026, **14:19:32.200–14:20:05.724 UTC**, including setup.
 The [driver](../performance/diagnose.ts) uses the same two shapes, 20 total users,
 limits, 2,000 requests, and three repetitions, at concurrency 10 only.
 Two separate 500-request warmups precede the six measured loads.
@@ -159,28 +164,29 @@ averages, not request counts, wait durations, or time-weighted measurements.
 
 ### Observations
 
-The [diagnostic summary](../performance/results/lock-diagnostics/summary.json)
+The [diagnostic summary](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/summary.json)
 contains full-precision aggregates; each row links its raw load and sample series.
 
 | Shape / repetition | Samples | Mean account-lock waiters | Peak waiters | Samples with account-lock wait | Raw load / samples |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Hot / 1 | 256 | 8.43 | 9 | 255/256 | [load](../performance/results/lock-diagnostics/hot-c10-r1.json) / [locks](../performance/results/lock-diagnostics/hot-c10-r1-locks.json) |
-| Hot / 2 | 241 | 8.49 | 9 | 240/241 | [load](../performance/results/lock-diagnostics/hot-c10-r2.json) / [locks](../performance/results/lock-diagnostics/hot-c10-r2-locks.json) |
-| Hot / 3 | 235 | 8.51 | 9 | 234/235 | [load](../performance/results/lock-diagnostics/hot-c10-r3.json) / [locks](../performance/results/lock-diagnostics/hot-c10-r3-locks.json) |
-| Many / 1 | 66 | 0.03 | 1 | 2/66 | [load](../performance/results/lock-diagnostics/many-c10-r1.json) / [locks](../performance/results/lock-diagnostics/many-c10-r1-locks.json) |
-| Many / 2 | 63 | 0.00 | 0 | 0/63 | [load](../performance/results/lock-diagnostics/many-c10-r2.json) / [locks](../performance/results/lock-diagnostics/many-c10-r2-locks.json) |
-| Many / 3 | 64 | 0.03 | 1 | 2/64 | [load](../performance/results/lock-diagnostics/many-c10-r3.json) / [locks](../performance/results/lock-diagnostics/many-c10-r3-locks.json) |
+| Hot / 1 | 240 | 8.50 | 9 | 240/240 | [load](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/hot-c10-r1.json) / [locks](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/hot-c10-r1-locks.json) |
+| Hot / 2 | 233 | 8.52 | 9 | 232/233 | [load](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/hot-c10-r2.json) / [locks](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/hot-c10-r2-locks.json) |
+| Hot / 3 | 229 | 8.50 | 9 | 228/229 | [load](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/hot-c10-r3.json) / [locks](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/hot-c10-r3-locks.json) |
+| Many / 1 | 62 | 0.00 | 0 | 0/62 | [load](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/many-c10-r1.json) / [locks](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/many-c10-r1-locks.json) |
+| Many / 2 | 61 | 0.00 | 0 | 0/61 | [load](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/many-c10-r2.json) / [locks](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/many-c10-r2-locks.json) |
+| Many / 3 | 60 | 0.00 | 0 | 0/60 | [load](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/many-c10-r3.json) / [locks](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/many-c10-r3-locks.json) |
 
 Each measured load accepted 2,000, rejected zero, and had zero unexpected outcomes.
 All account/user/accepted-ledger totals were 2,000: **12,000 measured actions**.
-The [hot warmup](../performance/results/lock-diagnostics/warmup-hot.json)
-and [many warmup](../performance/results/lock-diagnostics/warmup-many.json)
+The [hot warmup](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/warmup-hot.json)
+and [many warmup](../performance/results/lock-diagnostics-2026-10-23T14-19-32.199Z/warmup-many.json)
 each accepted and reconciled 500, excluded from measured totals.
 
 Every diagnostic sample saw ten API backend connections. Hot-account samples
-averaged 8.43–8.51 blocked at the account-lock statement; independent accounts
-averaged 0–0.03. Recorded `tuple` and `transactionid` events, together with the
-blocking-PID check, provide direct evidence of account-row lock contention.
+averaged 8.50–8.52 blocked at the account-lock statement; no account-lock waits
+were observed in the independent-account samples. Recorded `tuple` and
+`transactionid` events, together with the blocking-PID check, provide direct
+evidence of account-row lock contention.
 
 That contention is the strongest directly observed hot-account constraint.
 The experiment does not measure pool queue durations, individual lock-wait
@@ -188,7 +194,7 @@ times, per-statement costs, or CPU/storage utilization. Short waits may fall
 between samples. The observer adds work, and the diagnostic reuses a generator
 process, so its timings are separate observations rather than optimization gains.
 
-### Follow-up improvement
+### Optimization included in this run
 
 The current implementation removes one redundant usage-read round trip while
 keeping the account lock. In
@@ -197,9 +203,12 @@ keeping the account lock. In
 [consume](../src/modules/usage/consume.ts) reuses that value for rule evaluation.
 The ownership and missing-bucket checks remain in place.
 
-The saved measurements above predate this refactor. **No speedup has been
-measured for this change.** A future experiment could measure pool, statement,
-and lock-held time and repeat the same uninstrumented comparison.
+The October 23 measurements above include this refactor and the subsequent
+shared-type, application-wiring, and validation cleanup. The older October 18
+runs used a different workspace and uncontrolled host conditions, so they do
+not isolate the optimization's effect. **No speedup is attributed to this
+change.** A controlled comparison could measure pool, statement, and lock-held
+time before and after the change.
 
 ## Correctness during plan changes
 
@@ -341,7 +350,7 @@ They establish neither production capacity nor sustained-load behavior, a latenc
 SLA, an optimal worker/pool size, or a complete breakdown of transaction costs.
 
 The comparison retains all 18 measurements and both warmups; diagnostics retain
-six loads, their samples, and two warmups. No failed measurement was discarded
-to improve the tables. Successful runs checked accounting and redaction before
-removing their own resources. The [README](../README.md#tests) records the full
-regression command and workspace verification summary.
+six loads, their samples, and two warmups. All planned measurements from these
+completed October 23 runs are included. Successful runs checked accounting and
+redaction before removing their own resources. The [README](../README.md#tests)
+records the full regression command and workspace verification summary.

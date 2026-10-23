@@ -7,6 +7,7 @@ plans, assignments, monthly usage, and accepted/rejected decisions.
 - [Quick start](#quick-start)
 - [Example client](#example-client-walkthrough)
 - [Try the API](#try-the-api)
+- [Product assumptions](#product-assumptions)
 - [Behavior and design](#behavior-and-design)
 - [Architecture and data model](#architecture-and-data-model)
 - [Tests](#tests)
@@ -256,6 +257,39 @@ consumption only; history retains original rules and balances. Continue with
 `nextCursor` and the same user/month filters until it is `null`. Later inserts
 stay outside that cursor session. Repeat the walkthrough with fresh accounts/IDs.
 
+## Product assumptions
+
+These choices fill in behavior left open by the brief:
+
+- **Operator-only account provisioning.** An operator CLI creates accounts and
+  issues their first API key. This provides a trusted bootstrap before an
+  account can make authenticated API calls.
+- **One predictable blocking rule.** Check account per-request, user per-request,
+  account monthly, then user monthly limits. A fixed order gives clients a
+  consistent explanation when several rules would reject the same request.
+- **Accepted and rejected decisions stay final.** An identical retry returns the
+  original outcome and balances, even after a plan change. This lets a client
+  recover an uncertain response without changing the meaning of the action;
+  reevaluation needs a new request ID.
+- **Request IDs belong to an account.** IDs are unique across that account's
+  users and months. Each caller can manage its own namespace, while reuse for
+  a different user or units is reported as a conflict instead of a new charge.
+- **Past-month usage returns consumed units only.** Plans can change within a
+  month, so there is no single historical limit from which to calculate a
+  month's remaining allowance. Individual decisions retain their applied rules.
+- **Zero limits deny new consumption.** A zero monthly or per-request limit is
+  valid and blocks new actions under that rule. This supports disabling an
+  allowance without adding a separate plan state; saved retries still replay.
+- **The service generates user UUIDs.** Quota user identity is independent of
+  identifiers in a caller's system, and callers do not need to coordinate ID
+  allocation. Account ownership is still checked on every user operation.
+- **New users default to Basic.** Omitting `planId` gives a predictable starting
+  allowance and keeps creation simple. Callers can explicitly select another
+  eligible user plan during creation or assign one later.
+- **Plan reductions preserve usage and clamp remaining to zero.** Previously
+  accepted work remains accounted for when the new limit is below consumption.
+  New requests use the updated limits without rewriting earlier decisions.
+
 ## Behavior and design
 
 ### Accounting and plans
@@ -454,11 +488,11 @@ Focused `npm test`/Vitest runs should explicitly select a disposable
 `TEST_DATABASE_URL`. The concurrency suite also needs CREATEDB.
 `npm run typecheck` and `npm run build` can be run separately.
 
-The latest `npm run verify` passed on October 20, 2026, with shuffle seed
-`858541562`: typecheck, production build, **439 tests**, actual API/PostgreSQL
+The latest `npm run verify` passed on October 23, 2026, with shuffle seed
+`1714337735`: typecheck, production build, **448 tests**, actual API/PostgreSQL
 restarts, default Compose demo startup, and retained-data checks. This run used
-the local workspace based on `d27aeea`, including the uncommitted localhost-only
-PostgreSQL binding and usage-read refactor, with disposable Docker stacks.
+clean commit `5038fa7eca1a14371161681d27bbfcb7f82c34a2`, Node 22.22.1,
+PostgreSQL 17.6, and Compose 5.5.1 with disposable Docker stacks.
 Controlled faults and graceful restarts do not simulate every hardware failure,
 network partition, or availability condition.
 
@@ -472,8 +506,9 @@ npm run perf:diagnose
 These commands create isolated stacks and retain measured JSON evidence.
 The [performance report](docs/performance.md) contains reproduction settings,
 environment, raw links, lock diagnostics, correctness checks, and limitations.
-At concurrency 10 the saved comparison observed median ~293 accepted
-requests/sec for one busy account and ~1016 across ten accounts.
+At concurrency 10 the October 23 comparison observed median ~300 accepted
+requests/sec for one busy account and ~1,067 across ten accounts. All 36,000
+comparison actions and 12,000 separate diagnostic actions reconciled.
 
 For a small run against an explicitly configured local test API/database:
 `npm run perf -- --requests 20 --concurrency 2`. This workflow reads the
